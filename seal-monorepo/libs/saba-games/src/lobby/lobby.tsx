@@ -146,7 +146,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
                         selectedGameId={selectedGameId} 
                         onTabClick={this.handleTabClick} 
                     />
-                    <GameMatchTab gameId={selectedGame.gameId} className={styles['lobby-tabs']} leagueToogle={leagueToogle} />
+                    <GameMatchTab gameId={selectedGame.gameId} className={styles['lobby-tabs']} leagueToogle={leagueToogle} language={this.props.language} />
                 </>
             );
         };

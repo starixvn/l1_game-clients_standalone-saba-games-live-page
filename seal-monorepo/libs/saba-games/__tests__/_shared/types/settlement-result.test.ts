@@ -10,6 +10,8 @@ describe('settlement-result', () => {
         even: "even",
         big: "big",
         small: "small",
+        head: "head",
+        tail: "tail"
       });
     });
   });

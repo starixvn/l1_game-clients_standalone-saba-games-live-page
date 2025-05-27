@@ -30,6 +30,7 @@ function getSharedContainer(siteConfigs: gc.Configs.SiteConfigs) {
             gc.ConnectSite.FEATURE_NAME,
             gc.ChipSetting.FEATURE_NAME,
             gc.GatewayConnection.FEATURE_NAME,
+            gc.RoundBasePF.FEATURE_NAME,
             Lobby.FEATURE_NAME,
         ],
         features: [...gc.defaultFeatures, Lobby],
@@ -54,6 +55,5 @@ export function configGameContainer(gameName: string, containerOptions: gc.ICont
     const observerContainer = gc.buildObserverContainer(container);
 
     Observer.configure({ [gameName]: { mobx: { reaction }, container: observerContainer } });
-    console.log('create container', gameName);
     return container;
 }

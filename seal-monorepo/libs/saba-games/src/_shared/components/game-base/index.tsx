@@ -19,6 +19,7 @@ import { ROUND_STATE } from '@sg/sg-game-client/dist/game/rounds/round-time-stor
 import WarningDialog from '../notices/warning-dialog';
 import { RoundStore } from '@sg/sg-game-client/dist/game/rounds';
 import classNames from 'classnames';
+import { SyncMemberSiteBalance } from '../../utils/sync-member-site-balance';
 
 export interface IGameBaseState {
     isConnected: boolean;
@@ -79,12 +80,12 @@ abstract class GameBase<P extends GameBaseProps, S extends IGameBaseState> exten
 
     abstract processAuthorizationIfRoundMatches(roundId: number): void;
 
-    onVisibilityChange = () => {};
+    onVisibilityChange = () => { };
     @handle(gc.GatewayConnection.GatewayConnectionHandlers.ConnectHandler, (handler) => handler.handle())
-    connectToServiceGateway() {}
+    connectToServiceGateway() { }
 
     @handle(gc.Connection.ConnectionHandlers.CloseConnectHandler, (handler) => handler.handle())
-    terminateConnection() {}
+    terminateConnection() { }
 
     @render(gc.Connection.ConnectionStore, (store) => store.isSignedIn)
     handleConnected(isSignedIn: boolean) {
@@ -94,6 +95,13 @@ abstract class GameBase<P extends GameBaseProps, S extends IGameBaseState> exten
     @handle(gc.Connection.ConnectionHandlers.InGameHandler)
     inGame() {
         return this.props.namespace;
+    }
+
+    @render(gc.Bet.BetStore, (store) => store.validBet)
+    setIsValidBet(validBet: gc.Bet.IValidBet) {
+        if (validBet?.value) {
+            SyncMemberSiteBalance.getInstance().executeSyncBalance();
+        }
     }
 
     renderNotice(): JSX.Element {
@@ -190,7 +198,7 @@ abstract class GameBase<P extends GameBaseProps, S extends IGameBaseState> exten
     }
 
     @handle(Lobby.LobbyHandlers.TryToConnectHandler)
-    tryToConnectHandler() {}
+    tryToConnectHandler() { }
 
     @render(gc.Connection.ConnectionStore, (store) => store.isConnectFailed)
     handleConnectFail(isConnectFailed: boolean) {
@@ -239,7 +247,16 @@ abstract class GameBase<P extends GameBaseProps, S extends IGameBaseState> exten
     }
 
     toggleStatistic() {
-        this.setState({ isOpenStatistic: !this.state.isOpenStatistic });
+        const newState = !this.state.isOpenStatistic;
+        this.setState({ isOpenStatistic: newState });
+
+        // Notify parent window about statistic toggle
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+                type: 'TOGGLE_STATISTIC',
+                isOpen: newState
+            }, '*');
+        }
     }
 
     renderWaitingForNextRound() {
@@ -322,14 +339,19 @@ abstract class GameBase<P extends GameBaseProps, S extends IGameBaseState> exten
         );
     }
 
-    private renderAnimationBalance() {
+    protected renderAnimationBalance() {
         const { statusSettlement, isFinishShowResult } = this.state;
+
+
         if (!statusSettlement || !statusSettlement.win) {
             return <></>;
         }
+
         if (isFinishShowResult) {
             return <AnimationBalance winBet={statusSettlement?.bet} />;
         }
+
+        return null;
     }
 
     private renderLoading() {

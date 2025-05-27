@@ -1,4 +1,9 @@
 import { checkValidAmount, parseInputValue, WarnMsgType } from 'libs/saba-games/src/_shared/utils/betting-util';
+import { calculateMinMaxAmount } from '../../../src/_shared/utils/betting-util';
+import {
+    UNBALANCED_BIG_SMALL_4_GAME_NAMESPACE,
+    COIN_TOSS_GAME_NAMESPACE,
+} from '../../../constant/app';
 
 describe('betting-util', () => {
     describe('checkValidAmount', () => {
@@ -164,6 +169,104 @@ describe('betting-util', () => {
 
             // Assert
             expect(result).toBe(123);
+        });
+    });
+
+    describe('calculateMinMaxAmount', () => {
+        const baseMinBet = 10;
+        const baseStakeMin = 5;
+        const baseMaxBet = 50;
+        const baseStakeMax = 40;
+        const baseBetChoiceMax = 20;
+
+        it('calculateMinMaxAmount_nonEmptyChoices_shouldReturnMinAsHigherMinBetAndMaxUsingBetChoice', () => {
+            // Arrange
+            const maxBetPerChoices = { choiceA: baseBetChoiceMax };
+            const namespace = 'AnyNamespace';
+
+            // Act
+            const { min, max } = calculateMinMaxAmount(
+                baseMinBet,
+                baseStakeMin,
+                baseMaxBet,
+                baseStakeMax,
+                baseBetChoiceMax,
+                maxBetPerChoices,
+                namespace
+            );
+
+            // Assert
+            expect(min).toBe(baseMinBet);
+            expect(max).toBe(baseBetChoiceMax);
+        });
+
+        it('calculateMinMaxAmount_emptyChoicesAndSpecialNamespace_shouldReturnMinAsHigherMinBetAndMaxAsMinOfMaxBetAndStakeMax', () => {
+            // Arrange
+            const maxBetPerChoices: Record<string, number> = {};
+            const namespace = UNBALANCED_BIG_SMALL_4_GAME_NAMESPACE;
+            const customMaxBet = 100;
+            const customStakeMax = 80;
+
+            // Act
+            const { min, max } = calculateMinMaxAmount(
+                baseMinBet,
+                baseStakeMin,
+                customMaxBet,
+                customStakeMax,
+                baseBetChoiceMax,
+                maxBetPerChoices,
+                namespace
+            );
+
+            // Assert
+            expect(min).toBe(baseMinBet);
+            expect(max).toBe(Math.min(customMaxBet, customStakeMax));
+        });
+
+        it('calculateMinMaxAmount_emptyChoicesAndOtherNamespace_shouldReturnMinAsHigherMinBetAndMaxUsingBetChoice', () => {
+            // Arrange
+            const maxBetPerChoices: Record<string, number> = {};
+            const namespace = 'OtherGame';
+            const choiceMax = 15;
+            const customMaxBet = 100;
+            const customStakeMax = 80;
+
+            // Act
+            const { min, max } = calculateMinMaxAmount(
+                baseMinBet,
+                baseStakeMin,
+                customMaxBet,
+                customStakeMax,
+                choiceMax,
+                maxBetPerChoices,
+                namespace
+            );
+
+            // Assert
+            expect(min).toBe(baseMinBet);
+            expect(max).toBe(Math.min(choiceMax, customMaxBet, customStakeMax));
+        });
+
+        it('calculateMinMaxAmount_boundaryStakeMinGreaterThanMinBet_shouldReturnStakeMinAsMin', () => {
+            // Arrange
+            const maxBetPerChoices = { key: 5 };
+            const namespace = COIN_TOSS_GAME_NAMESPACE;
+            const stakeMinGreater = 20;
+
+            // Act
+            const { min, max } = calculateMinMaxAmount(
+                baseMinBet,
+                stakeMinGreater,
+                baseMaxBet,
+                baseStakeMax,
+                baseBetChoiceMax,
+                maxBetPerChoices,
+                namespace
+            );
+
+            // Assert
+            expect(min).toBe(stakeMinGreater);
+            expect(max).toBe(Math.min(baseBetChoiceMax, baseMaxBet, baseStakeMax));
         });
     });
 }); 
