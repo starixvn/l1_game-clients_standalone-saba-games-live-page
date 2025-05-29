@@ -26,8 +26,9 @@ describe('AnimationBalance Component', () => {
         expect(winAmount).toHaveClass('win-amount');
     });
 
-    it('should handle zero win amount', () => {
-        const winBet = 0;
+
+    it('should handle large numbers with correct formatting', () => {
+        const winBet = 1000000.99;
         render(<AnimationBalance winBet={winBet} />);
 
         const winAmount = screen.getByText(`+${gc.FormatUtils.numberWithCommas(winBet, 2)}`);
@@ -35,8 +36,8 @@ describe('AnimationBalance Component', () => {
         expect(winAmount).toHaveClass('win-amount');
     });
 
-    it('should handle large numbers with correct formatting', () => {
-        const winBet = 1000000.99;
+    it('should handle zero win amount', () => {
+        const winBet = 0;
         render(<AnimationBalance winBet={winBet} />);
 
         const winAmount = screen.getByText(`+${gc.FormatUtils.numberWithCommas(winBet, 2)}`);

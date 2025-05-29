@@ -13,17 +13,7 @@
     "test-coverage": "nx test saba-games --coverage",
     "test-saba-games": "nx test saba-games",
     "test-saba-games:watch": "nx test saba-games --watch",
-    "test-saba-games:debug": "nx test saba-games --runInBand",
-    "run-mono-iframe-test": "nx serve iframe-test",
-    "build-mono-iframe-test": "cd libs/iframe-test && webpack-cli build --node-env=production --config=webpack.config.js",
-    "build-iframe-test": "nx build iframe-test",
-    "build-iframe-test:dev": "nx build iframe-test --configuration=development",
-    "serve-dist-iframe-test": "cd dist/libs/iframe-test && npx serve . -s -p 3001 -C",
-    "serve-iframe-test-dev": "nx serve iframe-test --configuration=development --port=4201",
-    "build-and-serve-iframe-test-dev": "cross-env NODE_ENV=development nx build iframe-test --configuration=development && cd dist/libs/iframe-test && npx http-server -p 4201 --cors -c-1",
-    "test-iframe-test": "nx test iframe-test",
-    "test-iframe-test:watch": "nx test iframe-test --watch",
-    "test-iframe-test:debug": "nx test iframe-test --runInBand"
+    "test-saba-games:debug": "nx test saba-games --runInBand"
   },
   "private": true,
   "devDependencies": {
