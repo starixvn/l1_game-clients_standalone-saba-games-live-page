@@ -8,7 +8,7 @@ module.exports = {
         publicPath: '/saba-games/',
     },
     devServer: {
-        port: 4200,
+        port: 4551,
         historyApiFallback: {
             index: '/saba-games/index.html',
         },
