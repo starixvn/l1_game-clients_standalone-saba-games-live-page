@@ -56,8 +56,12 @@ flowchart TD
         ```js
         // Inside the iframe (standalone)
         window.addEventListener('message', (event) => {
-            if (event.origin !== 'https://expected-host.com') return;
-            const { type, payload } = event.data;
+            const encryptedMessage = event.data;
+            if (!messageEncryption.validateMessage(encryptedMessage)) {
+                console.warn('Received invalid encrypted message');
+                return;
+            }
+            const { type, payload } = messageEncryption.decrypt(encryptedMessage);
             if (type === 'SHOW_CONFIRM_BET') {
                 // Show confirm bet dialog
             }
@@ -84,8 +88,11 @@ flowchart TD
 | IFRAME_READY     | iframe → host | `{}`                              | Iframe loaded and ready  |
 
 -   **Security:**
-    -   Always validate the origin of incoming messages.
-    -   Never trust data from the parent window without validation.
+    -   All messages are encrypted using AES encryption with a shared secret key.
+    -   Each message includes an IV (Initialization Vector) for additional security.
+    -   Messages are validated before decryption to prevent tampering.
+    -   The encryption key is provided through configuration.
+    -   Never trust data from the parent window without validation and decryption.
 -   **Extensibility:**
     -   New message types can be added as needed for future features.
 -   **Versioning:**
@@ -129,6 +136,6 @@ flowchart TD
 -   **Integration Checklist for Hosts:**
     -   [ ] Use the correct iframe URL and version
     -   [ ] Handle all required message types
-    -   [ ] Validate all incoming messages and origins
+    -   [ ] Validate and decrypt all incoming messages using the shared encryption key
     -   [ ] Provide user/session/configuration data as needed
     -   [ ] Test integration in staging before production
