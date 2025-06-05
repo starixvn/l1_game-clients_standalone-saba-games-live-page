@@ -2,7 +2,7 @@
     flex: 1;
     min-width: 858px;
     min-height: 0;
-    /* margin-left: var(--left-width, 3.75rem); */
+    margin-left: var(--left-width, 3.75rem);
     height: 100%;
 }
 .main-container {
