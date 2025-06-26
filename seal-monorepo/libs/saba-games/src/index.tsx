@@ -6,7 +6,6 @@ import './style.module.scss';
 import App from './app';
 import { PLATFORM_TYPE_MAPPING, PLATFORM_TYPE_NUMBER } from '../constant/app';
 import { dataTheme } from './_shared/components/provider-set-dropdown';
-import { createMessageHandler, MessageType } from './_shared/utils/window-message-util';
 
 export const useSentryInit = ({ siteId, appEnv }) => {
     useEffect(() => {
@@ -27,7 +26,8 @@ const SabaGamesGroup = ({
     appEnv = '',
     siteId = '',
     language = 'en',
-    updateBalanceCallback = null
+    updateBalanceCallback = null,
+    encryptionKey = appSettings.encryptionKey || 'development-key'
 }) => {
     const platform = PLATFORM_TYPE_MAPPING[platformType] || '';
     const [currentTheme, setCurrentTheme] = useState('light-01');
@@ -37,41 +37,41 @@ const SabaGamesGroup = ({
     useSentryInit({ siteId, appEnv });
 
     // Handle messages from parent window
-    useEffect(() => {
-        const handleMessage = createMessageHandler({
-            [MessageType.UPDATE_SETTINGS]: (data) => {
-                console.log('UPDATE_SETTINGS received:', data);
-                const { theme, isDarkMode, language } = data.settings;
+    // useEffect(() => {
+    //     const handleMessage = createMessageHandler({
+    //         [MessageType.UPDATE_SETTINGS]: (data) => {
+    //             console.log('UPDATE_SETTINGS received:', data);
+    //             const { theme, isDarkMode, language } = data.settings;
 
-                console.log('Current state before update:', {
-                    theme: currentTheme,
-                    isDarkMode: currentIsDarkMode,
-                    language: currentLanguage
-                });
+    //             console.log('Current state before update:', {
+    //                 theme: currentTheme,
+    //                 isDarkMode: currentIsDarkMode,
+    //                 language: currentLanguage
+    //             });
 
-                setCurrentTheme(theme || 'light-01');
-                setIsDarkMode(isDarkMode);
-                setLanguage(language || 'en');
+    //             setCurrentTheme(theme || 'light-01');
+    //             setIsDarkMode(isDarkMode);
+    //             setLanguage(language || 'en');
 
-                // Update data attributes immediately
-                document.documentElement.setAttribute('data-theme', theme || 'light-01');
-                document.documentElement.setAttribute('data-darkmode', isDarkMode.toString());
+    //             // Update data attributes immediately
+    //             document.documentElement.setAttribute('data-theme', theme || 'light-01');
+    //             document.documentElement.setAttribute('data-darkmode', isDarkMode.toString());
 
-                console.log('State updated to:', {
-                    theme,
-                    isDarkMode,
-                    language
-                });
-            }
-        });
+    //             console.log('State updated to:', {
+    //                 theme,
+    //                 isDarkMode,
+    //                 language
+    //             });
+    //         }
+    //     });
 
-        console.log('Setting up message listener in SabaGamesGroup');
-        window.addEventListener('message', handleMessage);
-        return () => {
-            console.log('Cleaning up message listener in SabaGamesGroup');
-            window.removeEventListener('message', handleMessage);
-        };
-    }, []); // Remove dependencies to prevent recreation of listener
+    //     console.log('Setting up message listener in SabaGamesGroup');
+    //     window.addEventListener('message', handleMessage);
+    //     return () => {
+    //         console.log('Cleaning up message listener in SabaGamesGroup');
+    //         window.removeEventListener('message', handleMessage);
+    //     };
+    // }, []); // Remove dependencies to prevent recreation of listener
 
     // Log state changes
     useEffect(() => {
@@ -97,6 +97,7 @@ const SabaGamesGroup = ({
                 siteId={siteId}
                 renewToken={renewToken}
                 updateBalanceCallback={updateBalanceCallback}
+                encryptionKey={encryptionKey}
             />
         </div>
     );

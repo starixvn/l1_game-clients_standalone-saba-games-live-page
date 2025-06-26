@@ -5,6 +5,8 @@ import Lobby from './lobby/lobby';
 import { AppProvider, useAppContext } from './appProvider';
 import { SyncMemberSiteBalance } from './_shared/utils/sync-member-site-balance';
 import { useEffect } from 'react';
+import { createMessageHandlerConfig } from './_shared/utils/message-handler-manager';
+import { MessageProvider } from './_shared/contexts/message-context';
 
 interface AppProps extends AppContentProps {
     appEnv: string;
@@ -12,6 +14,7 @@ interface AppProps extends AppContentProps {
     language: string;
     renewToken?: Function;
     updateBalanceCallback?: void | null;
+    encryptionKey: string;
 }
 
 interface AppContentProps {
@@ -20,11 +23,13 @@ interface AppContentProps {
     updateBalanceCallback?: void | null;
 }
 
-const App = ({ appEnv, token, language, siteId, renewToken, updateBalanceCallback }: AppProps) => {
+const App = ({ appEnv, token, language, siteId, renewToken, updateBalanceCallback, encryptionKey }: AppProps) => {
     return (
-        <AppProvider appEnv={appEnv} language={language} siteId={siteId}>
-            <AppContent token={token} renewToken={renewToken} updateBalanceCallback={updateBalanceCallback} />
-        </AppProvider>
+        <MessageProvider config={createMessageHandlerConfig(appEnv, encryptionKey)} options={{}}>
+            <AppProvider appEnv={appEnv} language={language} siteId={siteId}>
+                <AppContent token={token} renewToken={renewToken} updateBalanceCallback={updateBalanceCallback} />
+            </AppProvider>
+        </MessageProvider>
     );
 };
 

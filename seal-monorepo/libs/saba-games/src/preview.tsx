@@ -7,6 +7,7 @@ import { PreviewProvider, usePreviewContext } from './previewProvider';
 import { requestSSO } from './_shared/utils/sso-helper';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import DiceDemo from './_shared/components/color-game-dice/dice-demo';
+import { appSettings } from './_shared/app-settings';
 
 const Preview = () => {
     const [token, setToken] = useState('');
@@ -50,6 +51,7 @@ const PreviewContext = ({ token, renewToken, updateBalanceCallback }) => {
     const siteId = VIVA88_SITE_ID;
     const platformType = PLATFORM_TYPE_NUMBER.DESKTOP;
     const platform = PLATFORM_TYPE_MAPPING[platformType];
+    const encryptionKey = appSettings.encryptionKey || 'development-key';
     useSentryInit();
 
     useEffect(() => {
@@ -137,6 +139,7 @@ const PreviewContext = ({ token, renewToken, updateBalanceCallback }) => {
                             siteId={siteId}
                             renewToken={renewToken}
                             updateBalanceCallback={updateBalanceCallback}
+                            encryptionKey={encryptionKey}
                         />
                     } />
                 </Routes>
