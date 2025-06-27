@@ -1,5 +1,5 @@
 import { MessageType, WindowMessage, MessageEvent, MessageHandler } from '../types/message-types';
-import { MessageEncryption } from '../../utils/encryption';
+import { EncryptedMessage, MessageEncryption } from '../../utils/encryption';
 
 export interface MessageHandlerConfig {
     isLocalDevelopment: boolean;
@@ -74,10 +74,12 @@ export class MessageHandlerManager {
     }
 
     public sendMessage(message: WindowMessage): void {
+        let messageData: WindowMessage | EncryptedMessage = message;
         if (this.config.enableEncryption && this.messageEncryption) {
-            const encryptedMessage = this.messageEncryption.encrypt(message);
-            window.parent.postMessage(encryptedMessage, '*');
+            messageData = this.messageEncryption.encrypt(message);
         }
+
+        window.parent.postMessage(messageData, '*');
     }
 
     public destroy(): void {
@@ -142,7 +144,7 @@ export const createMessageHandlerConfig = (environment: string, encryptionKey?: 
     return {
         isLocalDevelopment,
         allowedOrigins: isLocalDevelopment 
-            ? ['localhost:4551']
+            ? ['localhost:4200']
             : ['*'],
         encryptionKey,
         enableEncryption: !isLocalDevelopment && !!encryptionKey

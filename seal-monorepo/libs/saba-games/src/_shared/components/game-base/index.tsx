@@ -20,6 +20,7 @@ import WarningDialog from '../notices/warning-dialog';
 import { RoundStore } from '@sg/sg-game-client/dist/game/rounds';
 import classNames from 'classnames';
 import { SyncMemberSiteBalance } from '../../utils/sync-member-site-balance';
+import { MessageType } from '../../types/message-types';
 
 export interface IGameBaseState {
     isConnected: boolean;
@@ -253,7 +254,7 @@ abstract class GameBase<P extends GameBaseProps, S extends IGameBaseState> exten
         // Notify parent window about statistic toggle
         if (window.parent && window.parent !== window) {
             window.parent.postMessage({
-                type: 'TOGGLE_STATISTIC',
+                type: MessageType.TOGGLE_STATISTIC,
                 isOpen: newState
             }, '*');
         }

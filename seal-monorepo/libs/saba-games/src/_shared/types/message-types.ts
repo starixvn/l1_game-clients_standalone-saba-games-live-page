@@ -14,10 +14,12 @@ export enum MessageType {
 
 // Message interfaces
 interface ToggleStatisticMessage {
+    type: MessageType.TOGGLE_STATISTIC;
     isOpen: boolean;
 }
 
 interface UpdateSettingsMessage {
+    type: MessageType.UPDATE_SETTINGS;
     settings: {
         theme: string;
         isDarkMode: boolean;
@@ -26,6 +28,7 @@ interface UpdateSettingsMessage {
 }
 
 interface BettingBlockStateMessage {
+    type: MessageType.BETTING_BLOCK_STATE;
     state: {
         isShowBetSlip: boolean;
         betChoice: string;
@@ -34,6 +37,7 @@ interface BettingBlockStateMessage {
 }
 
 interface BetPanelStateMessage {
+    type: MessageType.BET_PANEL_STATE;
     state: {
         top: number;
         left: number;
@@ -52,7 +56,8 @@ interface BetPanelStateMessage {
     };
 }
 
-export interface HandleBetMessage {
+interface HandleBetMessage {
+    type: MessageType.HANDLE_BET;
     data: {
         amount: number;
         betChoice: string;
@@ -61,7 +66,13 @@ export interface HandleBetMessage {
 }
 
 interface HandleInputChangeMessage {
+    type: MessageType.HANDLE_INPUT_CHANGE;
     value: string;
+}
+
+interface SetHeightMessage {
+    type: MessageType.SET_HEIGHT;
+    height: number;
 }
 
 export interface MessageData {
@@ -73,7 +84,7 @@ export interface MessageData {
     [MessageType.TOGGLE_STATISTIC]?: ToggleStatisticMessage;
     [MessageType.HIDE_ALL_BET_PANELS]?: any;
     [MessageType.GET_HEIGHT]?: any;
-    [MessageType.SET_HEIGHT]?: any;
+    [MessageType.SET_HEIGHT]?: SetHeightMessage;
     [MessageType.HANDLE_CLEAR]?: any;
 }
 
@@ -85,6 +96,7 @@ export type WindowMessage =
     | BetPanelStateMessage
     | HandleBetMessage
     | HandleInputChangeMessage
+    | SetHeightMessage
     | { type: MessageType.HIDE_ALL_BET_PANELS | MessageType.HANDLE_CLEAR };
 
 // Message event type

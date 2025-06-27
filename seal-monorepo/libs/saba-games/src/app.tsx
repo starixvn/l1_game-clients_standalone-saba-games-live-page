@@ -56,7 +56,7 @@ const AppContent = ({ token, renewToken, updateBalanceCallback }: AppContentProp
 
     loadI18n(language);
     return (
-        <div data-react="true" style={{ width: '100%' }}>
+        <div id="saba-games-app" data-react="true" style={{ width: '100%' }}>
             {token && <Lobby token={token} language={language} renewToken={renewToken} />}
         </div>
     );

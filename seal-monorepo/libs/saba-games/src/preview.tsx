@@ -59,62 +59,6 @@ const PreviewContext = ({ token, renewToken, updateBalanceCallback }) => {
         document.documentElement.setAttribute('data-darkmode', isDarkMode.toString());
     }, [theme, isDarkMode]);
 
-    // Send height update to parent
-    const sendHeightUpdate = useCallback(() => {
-        if (!contentRef.current) return;
-
-        const contentHeight = contentRef.current.scrollHeight;
-        const newHeight = isExpanded ? Math.max(contentHeight, 400) : Math.max(contentHeight, 264);
-        console.log('Iframe: Content height:', contentHeight, 'New height:', newHeight);
-
-        window.parent.postMessage({
-            type: 'SET_HEIGHT',
-            height: newHeight
-        }, '*');
-    }, [isExpanded]);
-
-    // Handle messages from parent window
-    useEffect(() => {
-        const handleMessage = (event: MessageEvent) => {
-            console.log('Iframe: Received message:', event.data, 'from origin:', event.origin);
-
-            if (event.data.type === 'GET_HEIGHT') {
-                sendHeightUpdate();
-            } else if (event.data.type === 'TOGGLE_STATISTIC') {
-                console.log('Iframe: Toggling statistic:', event.data.isOpen);
-                setIsExpanded(event.data.isOpen);
-                // Send height update after state change and animation
-                setTimeout(sendHeightUpdate, 300);
-            }
-        };
-
-        window.addEventListener('message', handleMessage);
-        return () => window.removeEventListener('message', handleMessage);
-    }, [sendHeightUpdate]);
-
-    // Send height updates when content changes
-    useEffect(() => {
-        console.log('Iframe: Setting up height update observer');
-
-        // Send initial height after a delay to ensure content is rendered
-        setTimeout(sendHeightUpdate, 500);
-
-        // Set up ResizeObserver to detect content changes
-        const observer = new ResizeObserver(() => {
-            console.log('Iframe: Content size changed, sending update');
-            sendHeightUpdate();
-        });
-
-        if (contentRef.current) {
-            observer.observe(contentRef.current);
-        }
-
-        return () => {
-            console.log('Iframe: Cleaning up height update observer');
-            observer.disconnect();
-        };
-    }, [isExpanded, sendHeightUpdate]);
-
     return (
         <div
             ref={containerRef}

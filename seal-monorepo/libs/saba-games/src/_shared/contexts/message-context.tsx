@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { MessageHandlerManager, MessageHandlerConfig, MessageHandlerOptions } from '../utils/message-handler-manager';
 import { WindowMessage, MessageType, MessageData } from '../types/message-types';
+import { getElementTotalHeight } from '../utils/height-util';
 
 interface MessageContextType {
     sendMessage: (message: WindowMessage) => void;
@@ -86,12 +87,13 @@ const MessageManagerProvider: React.FC<MessageProviderProps> = ({
                 options.onToggleStatistic?.(data);
             },
             onGetHeight: () => {
-                handleMessage(undefined, MessageType.GET_HEIGHT);
-                options.onGetHeight?.();
-            },
-            onSetHeight: (data) => {
-                handleMessage(data, MessageType.SET_HEIGHT);
-                options.onSetHeight?.(data);
+                const appHeight = getElementTotalHeight('saba-games-app');               
+                const heightMessage = {
+                    type: MessageType.SET_HEIGHT,
+                    height: appHeight
+                } as const;
+                
+                sendMessage(heightMessage);
             }
         };
 
