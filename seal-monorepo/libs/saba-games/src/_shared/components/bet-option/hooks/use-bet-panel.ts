@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { IBetPanelState, IBetPanelConfig, IBetPanelPosition } from '../types/bet-panel.types';
+import { IBetPanelConfig, IBetPanelPosition } from '../types/bet-panel.types';
 import { calculateBetPanelState } from '../utils/bet-panel.utils';
+import { MessageType } from '../../../types/message-types';
+import { useMessageContext } from '../../../contexts/message-context';
 
 export const useBetPanel = (
     config: IBetPanelConfig,
@@ -9,6 +11,7 @@ export const useBetPanel = (
     gameName: string,
     namespace: string
 ) => {
+    const { sendMessage } = useMessageContext();
     const [isShowBetSlip, setIsShowBetSlip] = useState(false);
     const bettingBlockRef = useRef<HTMLDivElement>(null);
 
@@ -35,10 +38,13 @@ export const useBetPanel = (
             !isShowBetSlip
         );
 
-        window.parent.postMessage({
-            type: 'BET_PANEL_STATE',
-            state: panelState
-        }, '*');
+        const betPanelMessage = {
+            type: MessageType.BET_PANEL_STATE,
+            data: panelState
+        } as const;
+
+        sendMessage(betPanelMessage);
+
     }, [config, betChoice, odd, gameName, namespace, isShowBetSlip, getBetPanelPosition]);
 
     const handleClickOutside = useCallback((event: MouseEvent) => {

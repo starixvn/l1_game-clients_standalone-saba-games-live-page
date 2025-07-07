@@ -90,7 +90,9 @@ const MessageManagerProvider: React.FC<MessageProviderProps> = ({
                 const appHeight = getElementTotalHeight('saba-games-app');               
                 const heightMessage = {
                     type: MessageType.SET_HEIGHT,
-                    height: appHeight
+                    data: {
+                        height: appHeight
+                    }
                 } as const;
                 
                 sendMessage(heightMessage);

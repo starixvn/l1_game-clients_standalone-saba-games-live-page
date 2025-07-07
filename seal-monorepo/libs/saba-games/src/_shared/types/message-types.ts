@@ -15,12 +15,14 @@ export enum MessageType {
 // Message interfaces
 interface ToggleStatisticMessage {
     type: MessageType.TOGGLE_STATISTIC;
-    isOpen: boolean;
+    data: {
+        isOpen: boolean;
+    };
 }
 
 interface UpdateSettingsMessage {
     type: MessageType.UPDATE_SETTINGS;
-    settings: {
+    data: {
         theme: string;
         isDarkMode: boolean;
         language: string;
@@ -29,7 +31,7 @@ interface UpdateSettingsMessage {
 
 interface BettingBlockStateMessage {
     type: MessageType.BETTING_BLOCK_STATE;
-    state: {
+    data: {
         isShowBetSlip: boolean;
         betChoice: string;
         odd: number;
@@ -38,7 +40,7 @@ interface BettingBlockStateMessage {
 
 interface BetPanelStateMessage {
     type: MessageType.BET_PANEL_STATE;
-    state: {
+    data: {
         top: number;
         left: number;
         betChoice: string;
@@ -67,12 +69,16 @@ interface HandleBetMessage {
 
 interface HandleInputChangeMessage {
     type: MessageType.HANDLE_INPUT_CHANGE;
-    value: string;
+    data: {
+        value: string;
+    }
 }
 
 interface SetHeightMessage {
     type: MessageType.SET_HEIGHT;
-    height: number;
+    data: {
+        height: number;
+    }
 }
 
 export interface MessageData {
