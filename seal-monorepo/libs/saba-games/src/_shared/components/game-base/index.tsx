@@ -255,7 +255,9 @@ abstract class GameBase<P extends GameBaseProps, S extends IGameBaseState> exten
         if (window.parent && window.parent !== window) {
             window.parent.postMessage({
                 type: MessageType.TOGGLE_STATISTIC,
-                isOpen: newState
+                data: {
+                    isOpen: newState
+                }
             }, '*');
         }
     }
