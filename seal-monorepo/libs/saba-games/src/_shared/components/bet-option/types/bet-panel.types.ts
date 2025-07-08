@@ -17,6 +17,7 @@ export interface IBetPanelState {
     warnMsg: string;
     isShowBetSlip: boolean;
     clientSeed: string;
+    gameIconData?: string;
 }
 
 export interface IBetPanelConfig {
