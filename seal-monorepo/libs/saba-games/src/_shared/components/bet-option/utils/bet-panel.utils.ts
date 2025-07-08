@@ -20,7 +20,10 @@ import {
     BACCARAT_GAME_NAMESPACE,
     FISH_PRAWN_CRAB_GAME_NAMESPACE,
     COLOR_GAME_NAMESPACE,
-    COIN_TOSS_GAME_NAMESPACE
+    COIN_TOSS_GAME_NAMESPACE,
+    VIVA88_SITE_ID,
+    SABA_GAMES,
+    VGAMING
 } from '../../../../../constant/app';
 
 export const isSpecialBetChoice = (betChoice: string): boolean => {
@@ -53,6 +56,7 @@ export const calculateBetPanelState = (
     config: IBetPanelConfig,
     betChoice: string,
     odd: number,
+    siteId: string,
     gameName: string,
     namespace: string,
     position: IBetPanelPosition,
@@ -73,6 +77,7 @@ export const calculateBetPanelState = (
     );
 
     const gameIconData = getGameIconByNamespace(namespace);
+    const vendorName = siteId === VIVA88_SITE_ID ? SABA_GAMES : VGAMING;
 
     return {
         top: position.top,
@@ -84,6 +89,7 @@ export const calculateBetPanelState = (
         min: newMin,
         max: newMax,
         payout: '0.00',
+        vendorName,
         gameName,
         namespace,
         clientRoundId,

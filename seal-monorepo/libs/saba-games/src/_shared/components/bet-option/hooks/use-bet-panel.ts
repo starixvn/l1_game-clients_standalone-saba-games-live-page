@@ -3,6 +3,7 @@ import { IBetPanelConfig, IBetPanelPosition } from '../types/bet-panel.types';
 import { calculateBetPanelState } from '../utils/bet-panel.utils';
 import { MessageType } from '../../../types/message-types';
 import { useMessageContext } from '../../../contexts/message-context';
+import { useAppContext } from '../../../../appProvider';
 
 export const useBetPanel = (
     config: IBetPanelConfig,
@@ -11,6 +12,7 @@ export const useBetPanel = (
     gameName: string,
     namespace: string
 ) => {
+    const { siteId } = useAppContext();
     const { sendMessage } = useMessageContext();
     const [isShowBetSlip, setIsShowBetSlip] = useState(false);
     const bettingBlockRef = useRef<HTMLDivElement>(null);
@@ -32,6 +34,7 @@ export const useBetPanel = (
             config,
             betChoice,
             odd,
+            siteId,
             gameName,
             namespace,
             position,

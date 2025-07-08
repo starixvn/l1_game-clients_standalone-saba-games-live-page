@@ -10,6 +10,7 @@ export interface IBetPanelState {
     min: number;
     max: number;
     payout: string;
+    vendorName: string;
     gameName: string;
     namespace: string;
     clientRoundId: number;
