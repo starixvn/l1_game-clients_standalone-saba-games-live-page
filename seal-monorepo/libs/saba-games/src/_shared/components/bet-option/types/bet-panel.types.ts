@@ -16,7 +16,6 @@ export interface IBetPanelState {
     clientRoundId: number;
     isSpecialChoice: boolean;
     warnMsg: string;
-    isShowBetSlip: boolean;
     clientSeed: string;
     gameIconData?: string;
 }

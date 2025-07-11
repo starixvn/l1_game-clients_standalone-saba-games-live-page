@@ -59,8 +59,7 @@ export const calculateBetPanelState = (
     siteId: string,
     gameName: string,
     namespace: string,
-    position: IBetPanelPosition,
-    isShowBetSlip: boolean
+    position: IBetPanelPosition
 ): IBetPanelState => {
     const { minBet, maxBet, maxBetPerChoices, stakeLevel, currency, clientRoundId, clientSeed } = config;
     const { minBet: stakeLevelMinBet = 0, maxBet: stakeLevelMaxBet = 0 } = stakeLevel || {};
@@ -95,7 +94,6 @@ export const calculateBetPanelState = (
         clientRoundId,
         isSpecialChoice: isSpecialBetChoice(betChoice),
         warnMsg: '',
-        isShowBetSlip,
         clientSeed,
         gameIconData
     };

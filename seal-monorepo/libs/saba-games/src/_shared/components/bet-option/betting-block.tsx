@@ -2,7 +2,7 @@ import * as gc from '@sg/sg-game-client';
 import { Auth, Connection, Rounds } from '@sg/sg-game-client';
 import { handle, render } from '@sg/sg-observer';
 import classNames from 'classnames';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     GameBettingOptionsContext,
     GameBettingZoneContext,
@@ -11,10 +11,6 @@ import { IStateObserver, ObserverComponent } from '../observer-component/observe
 import Styles from './bet-option.module.scss';
 import { useBetPanel } from './hooks/use-bet-panel';
 import { IBetPanelConfig } from './types/bet-panel.types';
-import { BACCARAT_CHOICES, FISH_PRAWN_CRAB_CHOICES, SE_DIE_CHOICES, COLOR_GAME_CHOICES } from '../../../games/constants/saba-club';
-import { checkValidAmount, parseInputValue, WarnMsgType, calculateMinMaxAmount } from '../../utils/betting-util';
-import { useAppContext } from '../../../appProvider';
-import { calculateBetPanelState } from './utils/bet-panel.utils';
 
 interface BettingBlockProps {
     odd: number;
@@ -81,19 +77,20 @@ const BettingPanelContent: React.FC<BettingPanelContentProps> = ({
     waitForAuthorization
 }) => {
     const {
-        isShowBetSlip,
-        setIsShowBetSlip,
         bettingBlockRef,
-        sendBetPanelState
+        isShowBetSlip,
+        sendBetPanelState,
+        sendBettingBlockState
     } = useBetPanel(betPanelConfig, betChoice, odd, gameName, namespace);
 
     // Add effect to watch roundState changes
     useEffect(() => {
-        if (roundState !== Rounds.ROUND_STATE.PLACING_BET && isShowBetSlip) {
-            setIsShowBetSlip(false);
+        if (roundState === Rounds.ROUND_STATE.PLACING_BET && isShowBetSlip) {
             sendBetPanelState();
+        } else {
+            sendBettingBlockState(false);
         }
-    }, [roundState, isShowBetSlip, setIsShowBetSlip, sendBetPanelState]);
+    }, [roundState, isShowBetSlip]);
 
     const handleOnClick = (event: React.MouseEvent) => {
         event.stopPropagation();
@@ -104,15 +101,13 @@ const BettingPanelContent: React.FC<BettingPanelContentProps> = ({
             return;
         }
 
-        const newIsShowBetSlip = !isShowBetSlip;
-        console.log(`handleOnClick ${newIsShowBetSlip}`);
-        setIsShowBetSlip(newIsShowBetSlip);
-        sendBetPanelState();
-
         if (!isAuthorized) {
             autoCreateNickname();
-            waitForAuthorization(betChoice, odd);
         }
+
+        waitForAuthorization(betChoice, odd);
+
+        sendBettingBlockState(true);
     };
 
     return (

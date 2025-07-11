@@ -1,9 +1,10 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { IBetPanelConfig, IBetPanelPosition } from '../types/bet-panel.types';
 import { calculateBetPanelState } from '../utils/bet-panel.utils';
 import { MessageType } from '../../../types/message-types';
 import { useMessageContext } from '../../../contexts/message-context';
 import { useAppContext } from '../../../../appProvider';
+import { useBettingBlockData } from '../../../../hooks/use-message-data';
 
 export const useBetPanel = (
     config: IBetPanelConfig,
@@ -14,8 +15,9 @@ export const useBetPanel = (
 ) => {
     const { siteId } = useAppContext();
     const { sendMessage } = useMessageContext();
-    const [isShowBetSlip, setIsShowBetSlip] = useState(false);
+    const bettingBlockData = useBettingBlockData();
     const bettingBlockRef = useRef<HTMLDivElement>(null);
+    const [isShowBetSlip, setIsShowBetSlip] = useState(false);
 
     const getBetPanelPosition = useCallback((): IBetPanelPosition => {
         if (bettingBlockRef.current) {
@@ -37,8 +39,7 @@ export const useBetPanel = (
             siteId,
             gameName,
             namespace,
-            position,
-            !isShowBetSlip
+            position
         );
 
         const betPanelMessage = {
@@ -48,25 +49,59 @@ export const useBetPanel = (
 
         sendMessage(betPanelMessage);
 
-    }, [config, betChoice, odd, gameName, namespace, isShowBetSlip, getBetPanelPosition]);
+    }, [config, betChoice, odd, gameName, namespace]);
 
-    const handleClickOutside = useCallback((event: MouseEvent) => {
-        if (bettingBlockRef.current && !bettingBlockRef.current.contains(event.target as Node)) {
-            setIsShowBetSlip(false);
-        }
-    }, []);
+    // bet panel state of open or close
+    const sendBettingBlockState = useCallback((isShowBetSlip: boolean) => {
+        const bettingBlockMessage = {
+            type: MessageType.BETTING_BLOCK_STATE,
+            data: {
+                isShowBetSlip: isShowBetSlip,
+                betChoice: betChoice,
+                odd: odd,
+            }
+        } as const;
+
+        setIsShowBetSlip(isShowBetSlip);
+        sendMessage(bettingBlockMessage);
+
+
+
+    }, [config, betChoice, odd, gameName, namespace]);
 
     useEffect(() => {
+        if (!bettingBlockData) {
+            return;
+        }
+
+        const { isShowBetSlip: openBetSlip, betChoice: dataBetChoice } = bettingBlockData;
+
+        if (dataBetChoice !== betChoice) {
+            setIsShowBetSlip(false);
+            return;
+        }
+
+        setIsShowBetSlip(openBetSlip);
+    }, [bettingBlockData, betChoice]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (bettingBlockRef.current && !bettingBlockRef.current.contains(event.target as Node)) {
+                setIsShowBetSlip(false);
+            }
+        };
+
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [handleClickOutside]);
+    }, [bettingBlockRef]);
 
     return {
+        bettingBlockRef,
         isShowBetSlip,
         setIsShowBetSlip,
-        bettingBlockRef,
-        sendBetPanelState
+        sendBetPanelState,
+        sendBettingBlockState
     };
 }; 
