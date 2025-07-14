@@ -1,21 +1,60 @@
 import * as gc from "@sg/sg-game-client";
 import { render } from "@sg/sg-observer";
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { IPropsObserver, IStateObserver, ObserverComponent } from "../observer-component/observer-component";
 import BetModalSuccess from "../bet-modal-success";
+import { useMessageContext } from "../../contexts/message-context";
+import { MessageType } from "../../types/message-types";
+import { useHideConfirmBetData } from "../../../hooks/use-message-data";
 
 const DEBUG_STYLE = 'color: red; font-weight: bold;';
-
+interface IConfirmBetContentData {
+  totalStake: number;
+  betChoice: string;
+  namespace: string;
+}
 export interface IConfirmBet extends IStateObserver {
   totalStake: number;
   validBet: gc.Bet.IValidBet;
   betChoice: string;
   turnOffNotification: boolean;
   namespace: string;
+  confirmBetData: IConfirmBetContentData;
 }
 
-const NOTIF_KEY = 'turnOffNotification';
+const NOTIFY_KEY = 'turnOffNotification';
+
+interface IConfirmBetContentProps {
+  confirmBetData: IConfirmBetContentData;
+}
+
+const ConfirmBetContent: React.FC<IConfirmBetContentProps> = ({
+  confirmBetData
+}) => {
+  const { sendMessage } = useMessageContext();
+  const hideConfirmBetData = useHideConfirmBetData();
+
+  useEffect(() => {
+    if (hideConfirmBetData) {
+      sessionStorage.setItem(NOTIFY_KEY, hideConfirmBetData.turnOffNotification ? 'true' : 'false');
+    }
+  }, [hideConfirmBetData]);
+
+  useEffect(() => {
+    const { totalStake, betChoice, namespace } = confirmBetData;
+    sendMessage({
+      type: MessageType.SHOW_CONFIRM_BET,
+      data: {
+        totalStake,
+        betChoice,
+        namespace
+      }
+    });
+  }, [confirmBetData]);
+
+  return <></>;
+};
 
 export class ConfirmBet extends ObserverComponent<IPropsObserver, IConfirmBet> {
   private isJoiningGame = false;
@@ -27,36 +66,16 @@ export class ConfirmBet extends ObserverComponent<IPropsObserver, IConfirmBet> {
       totalStake: 0,
       validBet: {},
       betChoice: '',
-      turnOffNotification: false,
       namespace: props.namespace,
     } as IConfirmBet;
-
-    // Listen for messages from parent window
-    window.addEventListener('message', this.handleParentMessage);
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('message', this.handleParentMessage);
-  }
-
-  private handleParentMessage = (event: MessageEvent) => {
-    if (event.data.type === 'HIDE_CONFIRM_BET') {
-      console.log('%c[IFRAME] Received HIDE_CONFIRM_BET with notification setting:', DEBUG_STYLE, event.data);
-
-      // Update notification setting
-      if (typeof event.data.turnOffNotification === 'boolean') {
-        console.log('%c[IFRAME] Updating notification setting:', DEBUG_STYLE, event.data.turnOffNotification);
-        sessionStorage.setItem(NOTIF_KEY, event.data.turnOffNotification ? 'true' : 'false');
-        this.setState({ turnOffNotification: event.data.turnOffNotification });
-      }
-    }
-  };
 
   @render(gc.Bet.BetStore, (store) => store.lastReceivedBet)
   setTotalStake(lastReceivedBet: gc.Bet.ILastReceivedBet) {
     if (lastReceivedBet) {
       // Check if notifications are turned off
-      const isNotificationTurnedOff = sessionStorage.getItem(NOTIF_KEY) === 'true';
+      const isNotificationTurnedOff = sessionStorage.getItem(NOTIFY_KEY) === 'true';
       console.log('%c[IFRAME] Checking notification setting:', DEBUG_STYLE, { isNotificationTurnedOff });
 
       if (isNotificationTurnedOff) {
@@ -65,32 +84,7 @@ export class ConfirmBet extends ObserverComponent<IPropsObserver, IConfirmBet> {
         return;
       }
 
-      console.log('%c[IFRAME] Sending SHOW_CONFIRM_BET message', DEBUG_STYLE, {
-        totalStake: lastReceivedBet.value,
-        betChoice: this.state.betChoice,
-        namespace: this.state.namespace
-      });
-
       this.setState({ totalStake: lastReceivedBet.value });
-
-      // Log the message being sent
-      const message = {
-        type: 'SHOW_CONFIRM_BET',
-        payload: {
-          totalStake: lastReceivedBet.value,
-          betChoice: this.state.betChoice,
-          namespace: this.state.namespace,
-          isVisible: true
-        }
-      };
-      console.log('%c[IFRAME] Posting message to parent:', DEBUG_STYLE, message);
-
-      try {
-        window.parent.postMessage(message, '*');
-        console.log('%c[IFRAME] Message sent successfully', DEBUG_STYLE);
-      } catch (error) {
-        console.error('%c[IFRAME] Error sending message:', DEBUG_STYLE, error);
-      }
     }
   }
 
@@ -132,19 +126,19 @@ export class ConfirmBet extends ObserverComponent<IPropsObserver, IConfirmBet> {
 
   private shouldShowBetModalSuccess(): boolean {
     const { validBet, totalStake } = this.state;
-    const isNotificationTurnedOff = sessionStorage.getItem(NOTIF_KEY) === 'true';
-
-    console.log('%c[IFRAME] Checking if should show BetModalSuccess:', DEBUG_STYLE, {
-      hasValidBet: !!validBet?.value,
-      totalStake,
-      isNotificationTurnedOff
-    });
+    const isNotificationTurnedOff = sessionStorage.getItem(NOTIFY_KEY) === 'true';
 
     return !!validBet?.value && isNotificationTurnedOff && totalStake > 0;
   }
 
   render() {
     const { totalStake, validBet } = this.state;
+
+    const confirmBetData = {
+      totalStake: totalStake,
+      betChoice: this.state.betChoice,
+      namespace: this.state.namespace
+    }
 
     if (!validBet?.value) {
       console.log('%c[IFRAME] Not rendering - invalid bet', DEBUG_STYLE);
@@ -156,7 +150,6 @@ export class ConfirmBet extends ObserverComponent<IPropsObserver, IConfirmBet> {
       return <BetModalSuccess totalStake={totalStake} />;
     }
 
-    console.log('%c[IFRAME] Not rendering - waiting for parent window', DEBUG_STYLE);
-    return <></>;
+    return <ConfirmBetContent confirmBetData={confirmBetData} />;
   }
 }

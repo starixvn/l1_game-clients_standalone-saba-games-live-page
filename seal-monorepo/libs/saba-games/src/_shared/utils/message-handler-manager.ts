@@ -13,6 +13,8 @@ export interface MessageHandlerOptions {
     onBettingBlockState?: (data: any) => void;
     onBetPanelState?: (data: any) => void;
     onHandleBet?: (data: any) => void;
+    onShowConfirmBet?: (data: any) => void;
+    onHideConfirmBet?: (data: any) => void;
     onHandleInputChange?: (value: string) => void;
     onHandleClear?: () => void;
     onToggleStatistic?: (isOpen: boolean) => void;
@@ -48,6 +50,8 @@ export class MessageHandlerManager {
             [MessageType.BETTING_BLOCK_STATE]: this.options.onBettingBlockState,
             [MessageType.BET_PANEL_STATE]: this.options.onBetPanelState,
             [MessageType.HANDLE_BET]: this.options.onHandleBet,
+            [MessageType.SHOW_CONFIRM_BET]: this.options.onShowConfirmBet,
+            [MessageType.HIDE_CONFIRM_BET]: this.options.onHideConfirmBet,
             [MessageType.HANDLE_INPUT_CHANGE]: this.options.onHandleInputChange,
             [MessageType.HANDLE_CLEAR]: this.options.onHandleClear,
             [MessageType.TOGGLE_STATISTIC]: this.options.onToggleStatistic,
