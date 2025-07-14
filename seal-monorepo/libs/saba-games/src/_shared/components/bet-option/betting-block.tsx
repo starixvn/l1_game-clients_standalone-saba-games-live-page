@@ -84,7 +84,7 @@ const BettingPanelContent: React.FC<BettingPanelContentProps> = ({
         }
 
         handleBet(amount, dataBetChoice, clientSeed);
-    }, [handleBetData, roundState, betChoice, onBet, handleBet]);
+    }, [handleBetData]);
 
     return (
         <GameBettingZoneContext.Provider value={bettingZoneState}>
