@@ -41,12 +41,14 @@ const BettingPanelContent: React.FC<BettingPanelContentProps> = ({
 
     // Add effect to watch roundState changes
     useEffect(() => {
-        if (roundState === Rounds.ROUND_STATE.PLACING_BET && isShowBetSlip) {
-            sendBetPanelState();
-        } else {
-            sendBettingBlockState(false);
+        if (isShowBetSlip) {
+            if (roundState === Rounds.ROUND_STATE.PLACING_BET) {
+                sendBetPanelState();
+            } else {
+                sendBettingBlockState(false);
+            }
         }
-    }, [roundState, isShowBetSlip]);
+    }, [roundState, isShowBetSlip, betPanelConfig]);
 
     const handleOnClick = (event: React.MouseEvent) => {
         event.stopPropagation();

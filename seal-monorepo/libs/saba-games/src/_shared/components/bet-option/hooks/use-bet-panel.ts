@@ -64,9 +64,6 @@ export const useBetPanel = (
 
         setIsShowBetSlip(isShowBetSlip);
         sendMessage(bettingBlockMessage);
-
-
-
     }, [config, betChoice, odd, gameName, namespace]);
 
     useEffect(() => {
