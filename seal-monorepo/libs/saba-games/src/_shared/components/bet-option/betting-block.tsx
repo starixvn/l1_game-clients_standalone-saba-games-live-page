@@ -2,63 +2,17 @@ import * as gc from '@sg/sg-game-client';
 import { Auth, Connection, Rounds } from '@sg/sg-game-client';
 import { handle, render } from '@sg/sg-observer';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
     GameBettingOptionsContext,
     GameBettingZoneContext,
 } from '../../../_shared/react-contexts/game-betting-zone-context/game-betting-zone-context';
-import { IStateObserver, ObserverComponent } from '../observer-component/observer-component';
+import { ObserverComponent } from '../observer-component/observer-component';
 import Styles from './bet-option.module.scss';
 import { useBetPanel } from './hooks/use-bet-panel';
 import { IBetPanelConfig } from './types/bet-panel.types';
-
-interface BettingBlockProps {
-    odd: number;
-    betChoice: string;
-    gameName: string;
-    namespace: string;
-    children: React.ReactNode;
-    settlementResult?: gc.GameServiceMessage.TSettlementResult;
-    onBet: () => void;
-}
-
-interface IBettingBlockState extends IStateObserver {
-    isAuthorized: boolean;
-    isSignedIn: boolean;
-    isFinishShowResult: boolean;
-    isShowStaticHighlight?: boolean;
-    roundState: string;
-    clientRoundId: number;
-    stakeLevel: gc.Player.IStakeLevel;
-    currency: string;
-    minBet: number;
-    maxBet: number;
-    maxBetPerChoices: gc.GameServiceMessage.MaxBetPerChoices;
-    clientSeed: string;
-    betChoice: string;
-    odd: number;
-}
-
-interface BettingPanelContentProps {
-    betPanelConfig: IBetPanelConfig;
-    betChoice: string;
-    odd: number;
-    gameName: string;
-    namespace: string;
-    panelId: string;
-    onBet: () => void;
-    isAuthorized: boolean;
-    roundState: string;
-    autoCreateNickname: () => void;
-    children: React.ReactNode;
-    flashAnimationClass: string;
-    bettingZoneState: {
-        gameName: string;
-        betChoice: string;
-        odd: number;
-    };
-    waitForAuthorization: (betChoice: string, odd: number) => void;
-}
+import { useHandleBetData } from '../../../hooks/use-message-data';
+import { BettingBlockProps, BettingPanelContentProps, IBettingBlockState } from './types/bet-block.types';
 
 const BettingPanelContent: React.FC<BettingPanelContentProps> = ({
     betPanelConfig,
@@ -68,6 +22,7 @@ const BettingPanelContent: React.FC<BettingPanelContentProps> = ({
     namespace,
     panelId,
     onBet,
+    handleBet,
     isAuthorized,
     roundState,
     autoCreateNickname,
@@ -82,6 +37,7 @@ const BettingPanelContent: React.FC<BettingPanelContentProps> = ({
         sendBetPanelState,
         sendBettingBlockState
     } = useBetPanel(betPanelConfig, betChoice, odd, gameName, namespace);
+    const handleBetData = useHandleBetData();
 
     // Add effect to watch roundState changes
     useEffect(() => {
@@ -109,6 +65,24 @@ const BettingPanelContent: React.FC<BettingPanelContentProps> = ({
 
         sendBettingBlockState(true);
     };
+
+    useEffect(() => {
+        if (!handleBetData) {
+            return;
+        }
+
+        const { amount, betChoice: dataBetChoice, clientSeed } = handleBetData;
+        if (roundState !== Rounds.ROUND_STATE.PLACING_BET) {
+            onBet();
+            return;
+        }
+
+        if (dataBetChoice !== betChoice) {
+            return;
+        }
+
+        handleBet(amount, dataBetChoice, clientSeed);
+    }, [handleBetData, roundState, betChoice, onBet, handleBet]);
 
     return (
         <GameBettingZoneContext.Provider value={bettingZoneState}>
@@ -150,9 +124,6 @@ class BettingBlock extends ObserverComponent<BettingBlockProps, IBettingBlockSta
             betChoice: '',
             odd: 0
         };
-
-        // Add message event listener
-        window.addEventListener('message', this.handleWindowMessage);
     }
 
     componentDidMount() {
@@ -163,35 +134,8 @@ class BettingBlock extends ObserverComponent<BettingBlockProps, IBettingBlockSta
         if (this.timeoutId) {
             clearTimeout(this.timeoutId);
         }
-        // Remove message event listener
-        window.removeEventListener('message', this.handleWindowMessage);
         super.componentWillUnmount();
     }
-
-    private handleWindowMessage = (event: MessageEvent) => {
-        // Accept messages from any origin in development
-        try {
-            const data = event.data;
-            if (data.type === 'HANDLE_BET') {
-                console.log('Child: Received HANDLE_BET message:', data);
-                this.handleBetFromParent(data.amount, data.betChoice, data.clientSeed);
-            }
-        } catch (error) {
-            console.error('Child: Error processing message:', error);
-        }
-    };
-
-    private handleBetFromParent = (amount: number, betChoice: string, clientSeed: string) => {
-        if (this.state.roundState !== Rounds.ROUND_STATE.PLACING_BET) {
-            console.log('Child: Cannot place bet - not in PLACING_BET state');
-            console.log(`onBet ${this.state.roundState}`);
-            this.props.onBet();
-            return;
-        }
-
-        console.log('Child: Processing bet from parent:', { amount, betChoice, clientSeed });
-        this.handleBet(amount, betChoice, clientSeed);
-    };
 
     @render(Auth.AuthStore, (store) => store.isAuthorized)
     protected handleAuthorized(isAuthorized: boolean) {
@@ -345,6 +289,7 @@ class BettingBlock extends ObserverComponent<BettingBlockProps, IBettingBlockSta
                         namespace={namespace}
                         panelId={panelId}
                         onBet={this.props.onBet}
+                        handleBet={this.handleBet.bind(this)}
                         isAuthorized={this.state.isAuthorized}
                         roundState={this.state.roundState}
                         autoCreateNickname={this.autoCreateNickname.bind(this)}
