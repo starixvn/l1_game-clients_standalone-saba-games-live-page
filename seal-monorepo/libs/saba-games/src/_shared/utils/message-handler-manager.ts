@@ -143,7 +143,7 @@ export const createMessageHandlerConfig = (environment: string, encryptionKey?: 
     return {
         isLocalDevelopment,
         allowedOrigins: isLocalDevelopment 
-            ? ['localhost:4200']
+            ? ['localhost:4200', 'https://l1-seal-live-page-client-demo1.lumigame.com']
             : ['*'],
         encryptionKey,
         enableEncryption: !isLocalDevelopment && !!encryptionKey
