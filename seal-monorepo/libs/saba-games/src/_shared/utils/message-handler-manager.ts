@@ -1,5 +1,6 @@
 import { MessageType, WindowMessage, MessageEvent, MessageHandler } from '../types/message-types';
 import { EncryptedMessage, MessageEncryption } from '../../utils/encryption';
+import { appSettings } from '../app-settings';
 
 export interface MessageHandlerConfig {
     isLocalDevelopment: boolean;
@@ -139,12 +140,23 @@ export class MessageHandlerManager {
 
 export const createMessageHandlerConfig = (environment: string, encryptionKey?: string): MessageHandlerConfig => {
     const isLocalDevelopment = environment === 'LOCAL' || environment === '';
+    const currentOrigin = window.location.origin;
+
+    let allowedOrigins: string[];
+    if (isLocalDevelopment) {
+        allowedOrigins = [
+            'localhost:4200',
+            appSettings.standaloneUrl,
+            currentOrigin
+        ];
+    } else {
+        // TODO: UAT, SIT, PROD
+        allowedOrigins = ['*'];
+    }
 
     return {
         isLocalDevelopment,
-        allowedOrigins: isLocalDevelopment 
-            ? ['localhost:4200', 'https://l1-seal-live-page-client-demo1.lumigame.com']
-            : ['*'],
+        allowedOrigins,
         encryptionKey,
         enableEncryption: !isLocalDevelopment && !!encryptionKey
     };
