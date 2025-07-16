@@ -1,4 +1,4 @@
-import { MessageType, WindowMessage, MessageEvent, MessageHandler } from '../types/message-types';
+import { MessageType, WindowMessage, MessageEvent, MessageHandler, UpdateSettingsData, BetPanelStateData, BettingBlockStateData, HandleBetData, ShowConfirmBetData, HideConfirmBetData, ToggleStatisticData, SetHeightData } from '../types/message-types';
 import { EncryptedMessage, MessageEncryption } from '../../utils/encryption';
 import { appSettings } from '../app-settings';
 
@@ -10,16 +10,16 @@ export interface MessageHandlerConfig {
 }
 
 export interface MessageHandlerOptions {
-    onUpdateSettings?: (data: any) => void;
-    onBettingBlockState?: (data: any) => void;
-    onBetPanelState?: (data: any) => void;
-    onHandleBet?: (data: any) => void;
-    onShowConfirmBet?: (data: any) => void;
-    onHideConfirmBet?: (data: any) => void;
+    onUpdateSettings?: (data: UpdateSettingsData) => void;
+    onBettingBlockState?: (data: BettingBlockStateData) => void;
+    onBetPanelState?: (data: BetPanelStateData) => void;
+    onHandleBet?: (data: HandleBetData) => void;
+    onShowConfirmBet?: (data: ShowConfirmBetData) => void;
+    onHideConfirmBet?: (data: HideConfirmBetData) => void;
     onHandleClear?: () => void;
-    onToggleStatistic?: (isOpen: boolean) => void;
+    onToggleStatistic?: (data: ToggleStatisticData) => void;
     onGetHeight?: () => void;
-    onSetHeight?: (height: number) => void;
+    onSetHeight?: (data: SetHeightData) => void;
     customHandlers?: Record<string, (data: any) => void>;
 }
 
@@ -33,7 +33,7 @@ export class MessageHandlerManager {
     constructor(config: MessageHandlerConfig, options: MessageHandlerOptions = {}) {
         this.config = config;
         this.options = options;
-        
+
         if (config.enableEncryption && config.encryptionKey) {
             this.messageEncryption = new MessageEncryption(config.encryptionKey);
         }
@@ -94,7 +94,7 @@ export class MessageHandlerManager {
         handlers: Partial<Record<MessageType, (data: any) => void>>
     ): MessageHandler => {
         return (event: MessageEvent) => {
-            if (!this.config.allowedOrigins.some(origin => 
+            if (!this.config.allowedOrigins.some(origin =>
                 origin === '*' || event.origin.includes(origin)
             )) {
                 console.warn('Message from unauthorized origin:', event.origin);
