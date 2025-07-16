@@ -94,6 +94,20 @@ export const useBetPanel = (
         };
     }, [bettingBlockRef]);
 
+    useEffect(() => {
+        const handleResize = () => {
+            const shouldUpdatePosition = bettingBlockRef.current &&
+                isShowBetSlip;
+
+            if (shouldUpdatePosition) {
+                sendBetPanelState();
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [isShowBetSlip]);
+
     return {
         bettingBlockRef,
         isShowBetSlip,
