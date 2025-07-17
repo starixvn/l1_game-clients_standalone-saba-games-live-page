@@ -3,6 +3,9 @@ import styles from "./game-match-tab.module.scss";
 import classNames from "classnames";
 import { AppContextConsumer } from "../../../../appProvider";
 import { gameHeaderMap, gamePageMap } from "../../../utils/component-util";
+import { useMessageContext } from "../../../contexts/message-context";
+import { MessageType } from "../../../types/message-types";
+import { getElementTotalHeight } from "../../../utils/height-util";
 
 interface GameMatchTabProps {
     gameId?: any;
@@ -12,12 +15,25 @@ interface GameMatchTabProps {
 }
 
 export const GameMatchTab: React.FC<GameMatchTabProps> = ({ gameId, className, leagueToogle, language }) => {
+    const { sendMessage } = useMessageContext();
     const [isExpanded, setIsExpanded] = useState(true);
     const firstRender = useRef(true);
 
     const handleToggle = useCallback(() => {
         setIsExpanded(prev => !prev);
     }, []);
+
+    useEffect(() => {
+        const appHeight = getElementTotalHeight('saba-games-app');
+        const heightMessage = {
+            type: MessageType.SET_HEIGHT,
+            data: {
+                height: appHeight
+            }
+        } as const;
+
+        sendMessage(heightMessage);
+    }, [isExpanded, sendMessage]);
 
     useEffect(() => {
         if (firstRender.current) {
