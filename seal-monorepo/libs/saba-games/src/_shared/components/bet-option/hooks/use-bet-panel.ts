@@ -105,7 +105,9 @@ export const useBetPanel = (
         };
 
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        }
     }, [isShowBetSlip]);
 
     return {
