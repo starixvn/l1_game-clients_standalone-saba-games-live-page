@@ -33,6 +33,19 @@ export const GameMatchTab: React.FC<GameMatchTabProps> = ({ gameId, className, l
         } as const;
 
         sendMessage(heightMessage);
+
+        if (!isExpanded) {
+            const bettingBlockMessage = {
+                type: MessageType.BETTING_BLOCK_STATE,
+                data: {
+                    isShowBetSlip: false,
+                    betChoice: '',
+                    odd: 0,
+                }
+            } as const;
+
+            sendMessage(bettingBlockMessage);
+        }
     }, [isExpanded, sendMessage]);
 
     useEffect(() => {
