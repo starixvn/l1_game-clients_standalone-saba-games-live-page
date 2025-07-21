@@ -6,7 +6,7 @@ import { gameHeaderMap, gamePageMap } from "../../../utils/component-util";
 import { useMessageContext } from "../../../contexts/message-context";
 import { MessageType } from "../../../types/message-types";
 import { getElementTotalHeight } from "../../../utils/height-util";
-
+import { useSettingsData } from "../../../../hooks/use-message-data";
 interface GameMatchTabProps {
     gameId?: any;
     className?: any;
@@ -16,6 +16,7 @@ interface GameMatchTabProps {
 
 export const GameMatchTab: React.FC<GameMatchTabProps> = ({ gameId, className, leagueToogle, language }) => {
     const { sendMessage } = useMessageContext();
+    const settingData = useSettingsData();
     const [isExpanded, setIsExpanded] = useState(true);
     const firstRender = useRef(true);
 
@@ -74,11 +75,11 @@ export const GameMatchTab: React.FC<GameMatchTabProps> = ({ gameId, className, l
                 >
                     <div className='c-match c-in-play'>
                         <AppContextConsumer>
-                            {({ language }) =>
+                            {(context) => (
                                 GamePageComponent && (
-                                    <GamePageComponent namespace={namespace} language={language} />
+                                    <GamePageComponent namespace={namespace} language={settingData?.language || 'en'} />
                                 )
-                            }
+                            )}
                         </AppContextConsumer>
                     </div>
                 </div>

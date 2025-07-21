@@ -56,6 +56,9 @@ const MessageManagerProvider: React.FC<MessageProviderProps> = ({
             ...options,
             onUpdateSettings: (data) => {
                 handleMessage(data, MessageType.UPDATE_SETTINGS);
+
+                document.documentElement.setAttribute('data-theme', data.theme);
+                document.documentElement.setAttribute('data-darkmode', data.isDarkMode.toString());
                 options.onUpdateSettings?.(data);
             },
             onBettingBlockState: (data: BettingBlockStateData) => {
@@ -87,14 +90,14 @@ const MessageManagerProvider: React.FC<MessageProviderProps> = ({
                 options.onToggleStatistic?.(data);
             },
             onGetHeight: () => {
-                const appHeight = getElementTotalHeight('saba-games-app');               
+                const appHeight = getElementTotalHeight('saba-games-app');
                 const heightMessage = {
                     type: MessageType.SET_HEIGHT,
                     data: {
                         height: appHeight
                     }
                 } as const;
-                
+
                 sendMessage(heightMessage);
             }
         };

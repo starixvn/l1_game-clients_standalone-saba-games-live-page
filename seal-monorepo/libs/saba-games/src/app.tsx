@@ -2,11 +2,12 @@ import './styles/main.scss';
 import './_shared/utils/string-helper';
 import { loadI18n } from './i18n';
 import Lobby from './lobby/lobby';
-import { AppProvider, useAppContext } from './appProvider';
+import { AppProvider } from './appProvider';
 import { SyncMemberSiteBalance } from './_shared/utils/sync-member-site-balance';
 import { useEffect } from 'react';
 import { createMessageHandlerConfig } from './_shared/utils/message-handler-manager';
 import { MessageProvider } from './_shared/contexts/message-context';
+import { useSettingsData } from './hooks/use-message-data';
 
 interface AppProps extends AppContentProps {
     appEnv: string;
@@ -23,10 +24,10 @@ interface AppContentProps {
     updateBalanceCallback?: void | null;
 }
 
-const App = ({ appEnv, token, language, siteId, renewToken, updateBalanceCallback, encryptionKey }: AppProps) => {
+const App = ({ appEnv, token, siteId, renewToken, updateBalanceCallback, encryptionKey }: AppProps) => {
     return (
         <MessageProvider config={createMessageHandlerConfig(appEnv, encryptionKey)} options={{}}>
-            <AppProvider appEnv={appEnv} language={language} siteId={siteId}>
+            <AppProvider appEnv={appEnv} siteId={siteId}>
                 <AppContent token={token} renewToken={renewToken} updateBalanceCallback={updateBalanceCallback} />
             </AppProvider>
         </MessageProvider>
@@ -34,7 +35,7 @@ const App = ({ appEnv, token, language, siteId, renewToken, updateBalanceCallbac
 };
 
 const AppContent = ({ token, renewToken, updateBalanceCallback }: AppContentProps) => {
-    const { language } = useAppContext();
+    const settingData = useSettingsData();
 
     useEffect(() => {
         if (updateBalanceCallback) {
@@ -42,10 +43,10 @@ const AppContent = ({ token, renewToken, updateBalanceCallback }: AppContentProp
         }
     }, [updateBalanceCallback]);
 
-    loadI18n(language);
+    loadI18n(settingData?.language || 'en');
     return (
         <div id="saba-games-app" data-react="true" style={{ width: '100%' }}>
-            {token && <Lobby token={token} language={language} renewToken={renewToken} />}
+            {token && <Lobby token={token} language={settingData?.language || 'en'} renewToken={renewToken} />}
         </div>
     );
 };
