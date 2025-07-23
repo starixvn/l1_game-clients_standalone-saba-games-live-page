@@ -23,7 +23,7 @@ export const useBetPanel = (
         if (bettingBlockRef.current) {
             const rect = bettingBlockRef.current.getBoundingClientRect();
             return {
-                top: rect.bottom + window.scrollY,
+                top: rect.bottom + window.scrollY - 10,
                 left: rect.left + window.scrollX
             };
         }
