@@ -11,6 +11,8 @@ ENV PORT=$PORT
 # Copy package files from seal-monorepo directory
 COPY seal-monorepo/package*.json ./
 
+RUN rm -f package-lock.json
+
 # Install dependencies and global packages
 RUN npm install && \
     npm install -g cross-env nx
