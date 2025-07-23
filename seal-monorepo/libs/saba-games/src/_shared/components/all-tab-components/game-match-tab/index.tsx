@@ -5,7 +5,6 @@ import { AppContextConsumer } from "../../../../appProvider";
 import { gameHeaderMap, gamePageMap } from "../../../utils/component-util";
 import { useMessageContext } from "../../../contexts/message-context";
 import { MessageType } from "../../../types/message-types";
-import { getElementTotalHeight } from "../../../utils/height-util";
 import { useSettingsData } from "../../../../hooks/use-message-data";
 interface GameMatchTabProps {
     gameId?: any;
@@ -25,16 +24,6 @@ export const GameMatchTab: React.FC<GameMatchTabProps> = ({ gameId, className, l
     }, []);
 
     useEffect(() => {
-        const appHeight = getElementTotalHeight('saba-games-app');
-        const heightMessage = {
-            type: MessageType.SET_HEIGHT,
-            data: {
-                height: appHeight
-            }
-        } as const;
-
-        sendMessage(heightMessage);
-
         if (!isExpanded) {
             const bettingBlockMessage = {
                 type: MessageType.BETTING_BLOCK_STATE,
