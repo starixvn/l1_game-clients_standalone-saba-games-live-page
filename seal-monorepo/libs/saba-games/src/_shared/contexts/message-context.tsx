@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 import { MessageHandlerManager, MessageHandlerConfig, MessageHandlerOptions } from '../utils/message-handler-manager';
-import { WindowMessage, MessageType, MessageData, BettingBlockStateData, BetPanelStateData, HandleBetData, ShowConfirmBetData, HideConfirmBetData, ToggleStatisticData } from '../types/message-types';
+import { WindowMessage, MessageType, MessageData, BettingBlockStateData, BetPanelStateData, HandleBetData, ShowConfirmBetData, HideConfirmBetData, ToggleStatisticData, SetTokenData } from '../types/message-types';
 import { getElementTotalHeight } from '../utils/height-util';
 
 interface MessageContextType {
@@ -54,9 +54,12 @@ const MessageManagerProvider: React.FC<MessageProviderProps> = ({
     useEffect(() => {
         const enhancedOptions: MessageHandlerOptions = {
             ...options,
+            onSetToken: (data: SetTokenData) => {
+                handleMessage(data, MessageType.SET_TOKEN);
+                options.onSetToken?.(data);
+            },
             onUpdateSettings: (data) => {
                 handleMessage(data, MessageType.UPDATE_SETTINGS);
-
                 document.documentElement.setAttribute('data-theme', data.theme);
                 document.documentElement.setAttribute('data-darkmode', data.isDarkMode.toString());
                 options.onUpdateSettings?.(data);
