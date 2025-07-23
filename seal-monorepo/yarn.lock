@@ -2495,10 +2495,10 @@
     estree-walker "^2.0.1"
     picomatch "^2.2.2"
 
-"@sg/sg-game-client@1.0.7":
-  version "1.0.7"
-  resolved "http://npm.lumigame.com/@sg/sg-game-client/-/sg-game-client-1.0.7.tgz"
-  integrity sha512-TmbKzLf5YLsX3SR8MG6opDOMnQpFj9EoKl1hPRwXJxYIA7HCu+nXl2RdJpNW+7zyzuW7snEAZQwjAnnZt/DQTw==
+"@sg/sg-game-client@1.0.11":
+  version "1.0.11"
+  resolved "http://npm.lumigame.com/@sg/sg-game-client/-/sg-game-client-1.0.11.tgz"
+  integrity sha512-TzNJinvkV6hZIKsWUzvCm6nNyAT5XQDAdC9FO0ldOqJ226kXV42P6Jmo8BzFAIWRa1gQmzgx1UsmQDH7v6b6QA==
   dependencies:
     "@sg/sg-user-service-client" "1.8.5"
     base64-string "^1.1.2"
@@ -14743,7 +14743,7 @@ schema-utils@2.7.0:
     ajv "^6.12.2"
     ajv-keywords "^3.4.1"
 
-"seal-components@file:I:\\DEV\\SEAL\\standalone-saba-games-live-page\\seal-monorepo\\apps\\seal-components":
+"seal-components@file:C:\\Users\\jim.huang\\Documents\\standalone-saba-games-live-page\\seal-monorepo\\apps\\seal-components":
   version "1.30.0"
   resolved "file:apps/seal-components"
 
