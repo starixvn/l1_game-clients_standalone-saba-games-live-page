@@ -14743,7 +14743,7 @@ schema-utils@2.7.0:
     ajv "^6.12.2"
     ajv-keywords "^3.4.1"
 
-"seal-components@file:C:\\Users\\jim.huang\\Documents\\standalone-saba-games-live-page\\seal-monorepo\\apps\\seal-components":
+"seal-components@file:I:\\DEV\\SEAL\\standalone-saba-games-live-page\\seal-monorepo\\apps\\seal-components":
   version "1.30.0"
   resolved "file:apps/seal-components"
 
