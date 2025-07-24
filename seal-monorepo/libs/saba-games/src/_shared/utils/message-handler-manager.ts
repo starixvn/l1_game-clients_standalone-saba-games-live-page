@@ -156,6 +156,12 @@ export const createMessageHandlerConfig = (environment: string, encryptionKey?: 
         allowedOrigins = ['*'];
     }
 
+    console.log('allow createMessageHandlerConfig', {
+        isLocalDevelopment,
+        allowedOrigins,
+        encryptionKey,
+        enableEncryption: !isLocalDevelopment && !!encryptionKey
+    });
     return {
         isLocalDevelopment,
         allowedOrigins,

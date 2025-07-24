@@ -1,6 +1,6 @@
 {
     "sentry": {
-        "dsn": "https://b015ef787273452c8fce4af733e62d59@sentry.lumigame.com/29",
+        "dsn": "",
         "environment": "LOCAL2"
     },
     "systemType": "VG",
@@ -18,5 +18,7 @@
         "operatorToken": "ONEworksVGCashToken"
     },
     "defaultGameId": 2,
-    "userServicePath": "livepageuser"
+    "userServicePath": "livepageuser",
+    "standaloneUrl": "https://l2-standalone-live-page-local2.lumigame.com",
+    "encryptionKey": "development-key"
 }
