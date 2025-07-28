@@ -3,7 +3,6 @@ import './_shared/utils/string-helper';
 import { loadI18n } from './i18n';
 import Lobby from './lobby/lobby';
 import { AppProvider } from './appProvider';
-import { SyncMemberSiteBalance } from './_shared/utils/sync-member-site-balance';
 import { useEffect, useState, useRef } from 'react';
 import { createMessageHandlerConfig } from './_shared/utils/message-handler-manager';
 import { MessageProvider } from './_shared/contexts/message-context';
@@ -17,17 +16,15 @@ interface AppProps extends AppContentProps {
     siteId: string;
     language: string;
     renewToken?: Function;
-    updateBalanceCallback?: void | null;
     encryptionKey: string;
 }
 
 interface AppContentProps {
     token: string;
     renewToken?: Function;
-    updateBalanceCallback?: void | null;
 }
 
-const App = ({ appEnv, token, siteId, renewToken, updateBalanceCallback, encryptionKey }: AppProps) => {
+const App = ({ appEnv, token, siteId, renewToken, encryptionKey }: AppProps) => {
     const [decryptedToken, setDecryptedToken] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -54,25 +51,19 @@ const App = ({ appEnv, token, siteId, renewToken, updateBalanceCallback, encrypt
     return (
         <MessageProvider config={createMessageHandlerConfig(appEnv, encryptionKey)} options={{}}>
             <AppProvider appEnv={appEnv} siteId={siteId}>
-                <AppContent token={decryptedToken} renewToken={renewToken} updateBalanceCallback={updateBalanceCallback} />
+                <AppContent token={decryptedToken} renewToken={renewToken} />
             </AppProvider>
         </MessageProvider>
     );
 };
 
-const AppContent = ({ token, renewToken, updateBalanceCallback }: AppContentProps) => {
+const AppContent = ({ token, renewToken }: AppContentProps) => {
     const settingData = useSettingsData();
     const { sendMessage } = useMessageContext();
     const appContainerRef = useRef<HTMLDivElement>(null);
     const resizeObserverRef = useRef<ResizeObserver | null>(null);
     const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const lastHeightRef = useRef<number>(0);
-
-    useEffect(() => {
-        if (updateBalanceCallback) {
-            SyncMemberSiteBalance.getInstance().setSyncBalanceCallback(updateBalanceCallback);
-        }
-    }, [updateBalanceCallback]);
 
     useEffect(() => {
         const appContainer = appContainerRef.current;

@@ -1,11 +1,20 @@
 import * as gc from "@sg/sg-game-client";
 import { useEffect } from 'react';
-import { SyncMemberSiteBalance } from '../../utils/sync-member-site-balance';
 import style from './Success.module.scss';
+import { MessageType } from "../../types/message-types";
+import { useMessageContext } from "../../contexts/message-context";
 
 const BetModalSuccess = ({ totalStake }) => {
+    const { sendMessage } = useMessageContext();
+
     useEffect(() => {
-        SyncMemberSiteBalance.getInstance().executeSyncBalance(totalStake);
+        sendMessage({
+            type: MessageType.SYNC_BALANCE,
+            data: {
+                totalStake: totalStake,
+                winBet: undefined,
+            },
+        });
     }, [totalStake]);
 
     return (

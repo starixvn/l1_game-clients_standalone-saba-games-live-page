@@ -14,7 +14,7 @@ const SedieStatistic = React.lazy(() => import('./statistic'));
 const SeDieRoundHistory = React.lazy(() => import('./round-history'));
 
 @observer(setting.mainObserverNamespace)
-export default class SieDiePage extends GatewayGameBase<{ namespace: string; language: string }, IGatewayGameBaseState> {
+export default class SieDiePage extends GatewayGameBase<{ namespace: string; language: string; sendMessage: (message: any) => void }, IGatewayGameBaseState> {
     override overrideClasses = {
         blockWrapper: Styles['block-wrapper'],
         betOptions: Styles['bet-options-block'],
@@ -22,7 +22,7 @@ export default class SieDiePage extends GatewayGameBase<{ namespace: string; lan
         result: Styles['result-block'],
     };
 
-    constructor(props: { namespace: string; language: string }) {
+    constructor(props: { namespace: string; language: string; sendMessage: (message: any) => void }) {
         super(props);
         try {
             configGameContainer(setting.name, containerOptions);

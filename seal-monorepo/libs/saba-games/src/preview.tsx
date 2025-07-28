@@ -32,16 +32,14 @@ const Preview = () => {
         token && (
             <PreviewProvider>
                 <Router>
-                    <PreviewContext token={token} renewToken={handleGetToken} updateBalanceCallback={() => {
-                        console.log('updateBalanceCallback');
-                    }} />
+                    <PreviewContext token={token} renewToken={handleGetToken} />
                 </Router>
             </PreviewProvider>
         )
     );
 };
 
-const PreviewContext = ({ token, renewToken, updateBalanceCallback }) => {
+const PreviewContext = ({ token, renewToken }) => {
     const { theme, isDarkMode, language } = usePreviewContext();
     const [isExpanded, setIsExpanded] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -82,7 +80,6 @@ const PreviewContext = ({ token, renewToken, updateBalanceCallback }) => {
                             language={language}
                             siteId={siteId}
                             renewToken={renewToken}
-                            updateBalanceCallback={updateBalanceCallback}
                             encryptionKey={encryptionKey}
                         />
                     } />

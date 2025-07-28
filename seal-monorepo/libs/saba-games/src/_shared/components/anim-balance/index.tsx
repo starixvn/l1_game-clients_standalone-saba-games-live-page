@@ -1,11 +1,20 @@
 import * as gc from "@sg/sg-game-client";
 import { useEffect } from 'react';
-import { SyncMemberSiteBalance } from '../../utils/sync-member-site-balance';
 import style from './balance.module.scss';
+import { useMessageContext } from '../../contexts/message-context';
+import { MessageType } from "../../types/message-types";
 
 const AnimationBalance = ({ winBet }) => {
+    const { sendMessage } = useMessageContext();
+
     useEffect(() => {
-        SyncMemberSiteBalance.getInstance().executeSyncBalance(undefined, winBet);
+        sendMessage({
+            type: MessageType.SYNC_BALANCE,
+            data: {
+                totalStake: undefined,
+                winBet: winBet,
+            },
+        });
     }, [winBet]);
 
     return (

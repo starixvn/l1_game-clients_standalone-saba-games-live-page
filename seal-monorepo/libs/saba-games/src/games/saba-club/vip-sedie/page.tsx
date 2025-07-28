@@ -14,7 +14,7 @@ const SedieStatistic = React.lazy(() => import('../sedie/statistic'));
 const SeDieRoundHistory = React.lazy(() => import('../sedie/round-history'));
 
 @observer(setting.mainObserverNamespace)
-export default class VipSeDie extends GatewayGameBase<{ namespace: string; language: string }, IGatewayGameBaseState> {
+export default class VipSeDie extends GatewayGameBase<{ namespace: string; language: string; sendMessage: (message: any) => void }, IGatewayGameBaseState> {
     override overrideClasses = {
         blockWrapper: Styles['block-wrapper'],
         betOptions: Styles['bet-options-block'],
@@ -22,7 +22,7 @@ export default class VipSeDie extends GatewayGameBase<{ namespace: string; langu
         result: Styles['result-block'],
     };
 
-    constructor(props: { namespace: string; language: string }) {
+    constructor(props: { namespace: string; language: string; sendMessage: (message: any) => void }) {
         super(props);
         configGameContainer(setting.name, containerOptions);
         this.state = {

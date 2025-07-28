@@ -25,7 +25,6 @@ const SabaGamesGroup = ({
     appEnv = '',
     siteId = '',
     language = 'en',
-    updateBalanceCallback = null,
     encryptionKey = appSettings.encryptionKey || 'development-key'
 }) => {
     const platform = PLATFORM_TYPE_MAPPING[platformType] || '';
@@ -43,7 +42,6 @@ const SabaGamesGroup = ({
                 language={language}
                 siteId={siteId}
                 renewToken={renewToken}
-                updateBalanceCallback={updateBalanceCallback}
                 encryptionKey={encryptionKey}
             />
         </div>

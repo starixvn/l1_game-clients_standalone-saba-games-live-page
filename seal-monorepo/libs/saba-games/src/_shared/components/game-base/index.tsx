@@ -19,7 +19,6 @@ import { ROUND_STATE } from '@sg/sg-game-client/dist/game/rounds/round-time-stor
 import WarningDialog from '../notices/warning-dialog';
 import { RoundStore } from '@sg/sg-game-client/dist/game/rounds';
 import classNames from 'classnames';
-import { SyncMemberSiteBalance } from '../../utils/sync-member-site-balance';
 import { MessageType } from '../../types/message-types';
 
 export interface IGameBaseState {
@@ -101,7 +100,13 @@ abstract class GameBase<P extends GameBaseProps, S extends IGameBaseState> exten
     @render(gc.Bet.BetStore, (store) => store.validBet)
     setIsValidBet(validBet: gc.Bet.IValidBet) {
         if (validBet?.value) {
-            SyncMemberSiteBalance.getInstance().executeSyncBalance();
+            this.props.sendMessage({
+                type: MessageType.SYNC_BALANCE,
+                data: {
+                    totalStake: undefined,
+                    winBet: undefined,
+                },
+            });
         }
     }
 
@@ -252,14 +257,12 @@ abstract class GameBase<P extends GameBaseProps, S extends IGameBaseState> exten
         this.setState({ isOpenStatistic: newState });
 
         // Notify parent window about statistic toggle
-        if (window.parent && window.parent !== window) {
-            window.parent.postMessage({
-                type: MessageType.TOGGLE_STATISTIC,
-                data: {
-                    isOpen: newState
-                }
-            }, '*');
-        }
+        this.props.sendMessage({
+            type: MessageType.TOGGLE_STATISTIC,
+            data: {
+                isOpen: newState
+            }
+        })
     }
 
     renderWaitingForNextRound() {

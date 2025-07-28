@@ -66,7 +66,7 @@ export const GameMatchTab: React.FC<GameMatchTabProps> = ({ gameId, className, l
                         <AppContextConsumer>
                             {(context) => (
                                 GamePageComponent && (
-                                    <GamePageComponent namespace={namespace} language={settingData?.language || 'en'} />
+                                    <GamePageComponent namespace={namespace} language={settingData?.language || 'en'} sendMessage={sendMessage} />
                                 )
                             )}
                         </AppContextConsumer>

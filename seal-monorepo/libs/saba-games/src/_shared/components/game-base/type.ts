@@ -14,6 +14,7 @@ export type GamePropsContext = {
     namespace: string;
     language: string;
     overrideClasses?: string;
+    sendMessage: (message: any) => void;
 };
 
 export type GameBaseProps = GamePropsContext;

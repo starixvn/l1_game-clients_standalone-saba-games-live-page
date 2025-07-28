@@ -3,7 +3,8 @@ import type { GamePropsContext } from '../../components/game-base/type';
 
 export const GameContext = React.createContext<GamePropsContext>({
     namespace: 'default',
-    language: 'en'  // Adding default language
+    language: 'en',
+    sendMessage: () => {}
 });
 GameContext.displayName = 'GameContext';
 
