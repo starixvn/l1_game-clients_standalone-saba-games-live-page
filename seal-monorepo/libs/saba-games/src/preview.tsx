@@ -79,7 +79,6 @@ const PreviewContext = ({ token, renewToken }) => {
                             token={token}
                             language={language}
                             siteId={siteId}
-                            renewToken={renewToken}
                             encryptionKey={encryptionKey}
                         />
                     } />

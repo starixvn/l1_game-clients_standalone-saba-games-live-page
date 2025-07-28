@@ -21,7 +21,6 @@ const SabaGamesGroup = ({
     isDarkMode = false,
     platformType = PLATFORM_TYPE_NUMBER.DESKTOP,
     token = '',
-    renewToken = () => { },
     appEnv = '',
     siteId = '',
     language = 'en',
@@ -41,7 +40,6 @@ const SabaGamesGroup = ({
                 token={token}
                 language={language}
                 siteId={siteId}
-                renewToken={renewToken}
                 encryptionKey={encryptionKey}
             />
         </div>

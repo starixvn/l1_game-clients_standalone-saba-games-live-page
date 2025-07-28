@@ -15,16 +15,14 @@ interface AppProps extends AppContentProps {
     appEnv: string;
     siteId: string;
     language: string;
-    renewToken?: Function;
     encryptionKey: string;
 }
 
 interface AppContentProps {
     token: string;
-    renewToken?: Function;
 }
 
-const App = ({ appEnv, token, siteId, renewToken, encryptionKey }: AppProps) => {
+const App = ({ appEnv, token, siteId, encryptionKey }: AppProps) => {
     const [decryptedToken, setDecryptedToken] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -51,13 +49,13 @@ const App = ({ appEnv, token, siteId, renewToken, encryptionKey }: AppProps) => 
     return (
         <MessageProvider config={createMessageHandlerConfig(appEnv, encryptionKey)} options={{}}>
             <AppProvider appEnv={appEnv} siteId={siteId}>
-                <AppContent token={decryptedToken} renewToken={renewToken} />
+                <AppContent token={decryptedToken} />
             </AppProvider>
         </MessageProvider>
     );
 };
 
-const AppContent = ({ token, renewToken }: AppContentProps) => {
+const AppContent = ({ token }: AppContentProps) => {
     const settingData = useSettingsData();
     const { sendMessage } = useMessageContext();
     const appContainerRef = useRef<HTMLDivElement>(null);
@@ -127,6 +125,12 @@ const AppContent = ({ token, renewToken }: AppContentProps) => {
         };
     }, [sendMessage]);
 
+    const renewToken = () => {
+        sendMessage({
+            type: MessageType.RENEW_TOKEN,
+        });
+    };
+
     loadI18n(settingData?.language || 'en');
     return (
         <div 
@@ -135,7 +139,7 @@ const AppContent = ({ token, renewToken }: AppContentProps) => {
             data-react="true" 
             style={{ width: '100%' }}
         >
-            {token && <Lobby token={token} language={settingData?.language || 'en'} renewToken={renewToken} />}
+            {token && <Lobby token={token} language={settingData?.language || 'en'} renewToken={renewToken}/>}
         </div>
     );
 };
