@@ -12,6 +12,6 @@
     "enableMsgpackParserOnNotification": true,
     "defaultGameId": 2,
     "userServicePath": "livepageuser",
-    "standaloneUrl": "",
+    "iframeParentUrl": "",
     "encryptionKey": ""
 }

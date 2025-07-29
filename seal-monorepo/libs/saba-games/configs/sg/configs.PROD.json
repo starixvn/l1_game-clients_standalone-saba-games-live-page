@@ -13,6 +13,6 @@
     "enableSourceMap": false,
     "defaultGameId": 2,
     "userServicePath": "livepageuser",
-    "standaloneUrl": "",
+    "iframeParentUrl": "",
     "encryptionKey": ""
 }

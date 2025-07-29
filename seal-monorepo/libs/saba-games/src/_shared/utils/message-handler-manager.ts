@@ -148,7 +148,7 @@ export const createMessageHandlerConfig = (environment: string, encryptionKey?: 
     if (isLocalDevelopment) {
         allowedOrigins = [
             'localhost:4200',
-            appSettings.standaloneUrl,
+            appSettings.iframeParentUrl,
             currentOrigin
         ];
     } else {
