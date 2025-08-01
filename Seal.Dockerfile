@@ -6,7 +6,9 @@ WORKDIR /app
 
 # Add build arguments for better configurability
 ARG PORT=5000
+ARG DEPLOY_ENV
 ENV PORT=$PORT
+ENV DEPLOY_ENV=$DEPLOY_ENV
 
 # Copy package files from seal-monorepo directory
 COPY seal-monorepo/package*.json ./
@@ -22,11 +24,11 @@ RUN npm config set registry http://npm.lumigame.com && \
 # Copy the rest of the application
 COPY . .
 
-# Build the application for development
+# Build the application based on DEPLOY_ENV
 WORKDIR /app/seal-monorepo
 RUN npm install && \
     nx reset && \
-    cross-env NODE_ENV=development nx build saba-games --configuration=development
+    cross-env NODE_ENV=$DEPLOY_ENV nx build saba-games --configuration=$DEPLOY_ENV
 
 # Production stage
 FROM hub.lumigame.com/base/nginx:stable-alpine-slim
