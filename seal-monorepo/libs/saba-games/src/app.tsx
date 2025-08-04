@@ -45,6 +45,8 @@ const App = ({ appEnv, token, siteId, encryptionKey }: AppProps) => {
     if (isLoading) {
         return <div>Loading...</div>;
     }
+
+    console.log("stand alone game decryptedToken: ", decryptedToken);
     
     return (
         <MessageProvider config={createMessageHandlerConfig(appEnv, encryptionKey)} options={{}}>

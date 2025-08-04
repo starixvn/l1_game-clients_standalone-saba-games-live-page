@@ -133,6 +133,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
             }
 
             const hasGames = offerGames.length > 0;
+            console.log("stand alone game", hasGames, isAuthenticated);
             if (!hasGames || !isAuthenticated) {
                 return <Loading />;
             }
