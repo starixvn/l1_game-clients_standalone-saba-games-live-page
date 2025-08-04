@@ -50,6 +50,22 @@
               "--config=webpack.dev.js"
             ]
           }
+        },
+        "UAT": {
+          "options": {
+            "args": [
+              "--node-env=UAT",
+              "--config=webpack.uat.js"
+            ]
+          }
+        },
+        "production": {
+          "options": {
+            "args": [
+              "--node-env=production",
+              "--config=webpack.config.js"
+            ]
+          }
         }
       }
     },

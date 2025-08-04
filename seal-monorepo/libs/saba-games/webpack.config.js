@@ -1,6 +1,7 @@
 const { NxWebpackPlugin } = require('@nx/webpack');
 const { NxReactWebpackPlugin } = require('@nx/react');
 const { join } = require('path');
+const webpack = require('webpack');
 
 const getPreviewAssets = (isDev) => {
     if (!isDev) return [];
@@ -23,6 +24,9 @@ module.exports = {
         historyApiFallback: true,
     },
     plugins: [
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+        }),
         new NxWebpackPlugin({
             tsConfig: './tsconfig.app.json',
             compiler: 'babel',
