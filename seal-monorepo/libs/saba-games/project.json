@@ -50,24 +50,35 @@
               "--config=webpack.dev.js"
             ]
           }
-        },
-        "UAT": {
-          "options": {
-            "args": [
-              "--node-env=UAT",
-              "--config=webpack.uat.js"
-            ]
-          }
-        },
-        "production": {
-          "options": {
-            "args": [
-              "--node-env=production",
-              "--config=webpack.config.js"
-            ]
-          }
         }
       }
+    },
+    "build:UAT": {
+      "options": {
+        "cwd": "libs/saba-games",
+        "args": [
+          "--node-env=UAT",
+          "--config=webpack.uat.js"
+        ],
+        "command": "webpack-cli build"
+      },
+      "cache": true,
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "default",
+        "^default",
+        {
+          "externalDependencies": [
+            "webpack-cli"
+          ]
+        }
+      ],
+      "outputs": [
+        "{workspaceRoot}/dist\\libs\\saba-games"
+      ],
+      "executor": "nx:run-commands"
     },
     "lint": {
       "cache": true,
