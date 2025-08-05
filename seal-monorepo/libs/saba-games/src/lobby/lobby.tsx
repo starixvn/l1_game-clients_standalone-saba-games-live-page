@@ -50,21 +50,25 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
 
     componentDidMount() {
         const { token } = this.props;
+        console.log('stand alone game componentDidMount', token);
         this.sso({ token });
     }
 
     @handle(gc.Auth.AuthHandlers.SSO)
     sso(ssoInfo: gc.Auth.ISSOInfo) {
+        console.log('stand alone game ssoInfo', ssoInfo);
         return ssoInfo;
     }
 
     @render(gc.App.AppStore, (store) => store.isSessionTimeout)
     redirectToSessionTimeoutPage(isSessionTimeout: boolean) {
+        console.log('stand alone game redirectToSessionTimeoutPage', isSessionTimeout);
         this.setState({ isSessionTimeout });
     }
 
     @render(gc.Auth.AuthStore, (store) => store.isAuthenticated)
     handleIsAuthenticated(isAuthenticated: boolean) {
+        console.log('stand alone game handleIsAuthenticated', isAuthenticated);
         this.setState({ isAuthenticated });
         if (isAuthenticated) {
             this.connectLiveGateway();
