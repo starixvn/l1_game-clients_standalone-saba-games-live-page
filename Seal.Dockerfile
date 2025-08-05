@@ -28,8 +28,13 @@ COPY . .
 WORKDIR /app/seal-monorepo
 RUN npm install && \
     nx reset && \
-    cross-env NODE_ENV=$DEPLOY_ENV nx build:$DEPLOY_ENV saba-games && \
-    echo "Build completed successfully for $DEPLOY_ENV"
+    if echo "$DEPLOY_ENV" | grep -q "^LOCAL_"; then \
+        cross-env NODE_ENV=development nx build saba-games && \
+        echo "Build completed successfully for development (${DEPLOY_ENV})"; \
+    else \
+        cross-env NODE_ENV=$DEPLOY_ENV nx build:$DEPLOY_ENV saba-games && \
+        echo "Build completed successfully for $DEPLOY_ENV"; \
+    fi
 
 # Production stage
 FROM hub.lumigame.com/base/nginx:stable-alpine-slim
