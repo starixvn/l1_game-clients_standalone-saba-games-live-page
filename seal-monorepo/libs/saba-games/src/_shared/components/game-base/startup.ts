@@ -19,6 +19,7 @@ declare global {
 function getSharedContainer(siteConfigs: gc.Configs.SiteConfigs) {
     const containerOptions: gc.IContainerOptions = {
         onContainerCreated: (container) => {
+            console.log('stand alone game containerOptions', siteConfigs);
             container.bind(gc.Configs.SiteConfigs).toConstantValue(siteConfigs);
         },
 
@@ -36,12 +37,14 @@ function getSharedContainer(siteConfigs: gc.Configs.SiteConfigs) {
         features: [...gc.defaultFeatures, Lobby],
     };
 
+    
     return gc.getContainer(containerOptions);
 }
 
 export const sharedContainer = getSharedContainer(getSiteConfig(appSettings.defaultGameId));
 
 export function configSharedContainer() {
+    console.log('stand alone game configSharedContainer', gc.buildObserverContainer(sharedContainer));
     Observer.configure({ default: { mobx, container: gc.buildObserverContainer(sharedContainer) } });
     return sharedContainer;
 }
@@ -50,6 +53,7 @@ export function configGameContainer(gameName: string, containerOptions: gc.ICont
     const container = gc.getContainer(containerOptions);
 
     const lobbyStore = sharedContainer.get(LobbyStore);
+    console.log('stand alone game lobbyStore', lobbyStore);
     container.bind(LobbyStore).toConstantValue(lobbyStore);
 
     const observerContainer = gc.buildObserverContainer(container);
