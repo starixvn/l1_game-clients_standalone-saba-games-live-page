@@ -51,10 +51,13 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     componentDidMount() {
         const { token } = this.props;
         console.log('stand alone game componentDidMount', token);
-        this.sso({ token });
+
 
         console.log('AuthStore in componentDidMount:', gc.Auth.AuthStore);
-        console.log('AuthStore.isAuthenticated:', gc.Auth.AuthStore.isAuthenticated);
+
+        setTimeout(() => {
+        this.sso({ token });
+    }, 2000);
     }
 
     @handle(gc.Auth.AuthHandlers.SSO)
