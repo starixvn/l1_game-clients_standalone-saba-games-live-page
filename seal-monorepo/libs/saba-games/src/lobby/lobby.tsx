@@ -13,6 +13,7 @@ import { GameMatchTab } from '../_shared/components/all-tab-components/game-matc
 import { IOfferGame, ILobbyState } from './type';
 import { GameListTab } from '../_shared/components/all-tab-components/game-list-tab';
 import SessionTimeout from '../_shared/components/timeout';
+import * as mobx from 'mobx';
 
 @observer
 class LobbyComponent extends React.PureComponent<any, ILobbyState> {
@@ -52,7 +53,27 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     componentDidMount() {
         const { token } = this.props;
         console.log('stand alone game componentDidMount', token);
+        
+        try {
+            const { sharedContainer } = require('../_shared/components/game-base/startup');
+            const authStore = sharedContainer.get(gc.Auth.AuthStore);
+            console.log('stand AuthStore instance:', authStore);
+            
+            // 檢查是否為 MobX observable
+            if (authStore && typeof authStore.isAuthenticated !== 'undefined') {
+                console.log('stand AuthStore is observable:', mobx.isObservable(authStore));
+            }
+            
+            // 檢查 AuthStore 的構造函數
+            console.log('stand AuthStore constructor:', authStore?.constructor);
+            console.log('stand AuthStore prototype:', Object.getPrototypeOf(authStore));
+            
+        } catch (error) {
+            console.error('stand Error checking AuthStore:', error);
+        }
 
+        console.log('AuthStore in componentDidMount:', gc.Auth.AuthStore);
+        console.log('stand AuthStore in componentDidMount:', gc.Auth.AuthStore);
 
         console.log('AuthStore in componentDidMount:', gc.Auth.AuthStore);
 
