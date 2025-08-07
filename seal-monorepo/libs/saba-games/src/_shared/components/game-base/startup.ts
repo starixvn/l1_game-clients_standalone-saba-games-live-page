@@ -6,6 +6,7 @@ import 'reflect-metadata';
 import { getSiteConfig, appSettings } from '../../app-settings';
 import { Lobby } from '../../states';
 import { LobbyStore } from '../../states/lobby';
+
 interface Languages {
     [key: string]: any;
 }
@@ -19,7 +20,6 @@ declare global {
 function getSharedContainer(siteConfigs: gc.Configs.SiteConfigs) {
     const containerOptions: gc.IContainerOptions = {
         onContainerCreated: (container) => {
-            console.log('stand alone game containerOptions', siteConfigs);
             container.bind(gc.Configs.SiteConfigs).toConstantValue(siteConfigs);
         },
 
@@ -37,14 +37,17 @@ function getSharedContainer(siteConfigs: gc.Configs.SiteConfigs) {
         features: [...gc.defaultFeatures, Lobby],
     };
 
-    
     return gc.getContainer(containerOptions);
 }
 
 export const sharedContainer = getSharedContainer(getSiteConfig(appSettings.defaultGameId));
 
+// Make the shared container available globally for external access
+if (typeof window !== 'undefined') {
+    (window as any).saba_games_shared_container = sharedContainer;
+}
+
 export function configSharedContainer() {
-    console.log('stand alone game configSharedContainer', gc.buildObserverContainer(sharedContainer));
     Observer.configure({ default: { mobx, container: gc.buildObserverContainer(sharedContainer) } });
     return sharedContainer;
 }
@@ -53,7 +56,6 @@ export function configGameContainer(gameName: string, containerOptions: gc.ICont
     const container = gc.getContainer(containerOptions);
 
     const lobbyStore = sharedContainer.get(LobbyStore);
-    console.log('stand alone game lobbyStore', lobbyStore);
     container.bind(LobbyStore).toConstantValue(lobbyStore);
 
     const observerContainer = gc.buildObserverContainer(container);
