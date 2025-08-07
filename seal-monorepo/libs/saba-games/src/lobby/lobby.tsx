@@ -1,4 +1,5 @@
 import * as gc from '@sg/sg-game-client';
+import { sharedContainer } from '../_shared/components/game-base/startup';
 import { handle, observer, render } from '@sg/sg-observer';
 import React from 'react';
 import { configSharedContainer } from '../_shared/components/game-base/startup';
@@ -56,8 +57,8 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         console.log('AuthStore in componentDidMount:', gc.Auth.AuthStore);
 
         setTimeout(() => {
-        this.sso({ token });
-    }, 2000);
+            this.sso({ token });
+        }, 2000);
     }
 
     @handle(gc.Auth.AuthHandlers.SSO)
@@ -75,6 +76,12 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     @render(gc.Auth.AuthStore, (store) => {
         console.log('AuthStore state:', store);
         console.log('isAuthenticated value:', store.isAuthenticated);
+        const gatewayStore = sharedContainer.get(gc.GatewayConnection.GatewayConnectionStore);
+        console.log('Gateway connection state:', {
+            isConnected: gatewayStore.isConnected,
+            isConnectFailed: gatewayStore.isConnectFailed,
+            isDisconnect: gatewayStore.isDisconnect
+        });
         return store.isAuthenticated;
     })
     handleIsAuthenticated(isAuthenticated: boolean) {
@@ -86,7 +93,13 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     }
 
     @handle(gc.GatewayConnection.GatewayConnectionHandlers.ConnectHandler)
-    connectLiveGateway() {}
+    connectLiveGateway() {
+        const gatewayConnectionStore = sharedContainer.get(gc.GatewayConnection.GatewayConnectionStore);
+        if (!gatewayConnectionStore.isConnected) {
+            console.log('Attempting to connect to gateway...');
+            gatewayConnectionStore.initConnection();
+        }
+    }
 
     @render(gc.Player.MainPlayerStore, (store) => store.offerGames)
     handleOfferGames(offerGames: IOfferGame[]) {
@@ -156,10 +169,10 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
 
             return (
                 <>
-                    <GameListTab 
-                        offerGames={offerGames} 
-                        selectedGameId={selectedGameId} 
-                        onTabClick={this.handleTabClick} 
+                    <GameListTab
+                        offerGames={offerGames}
+                        selectedGameId={selectedGameId}
+                        onTabClick={this.handleTabClick}
                     />
                     <GameMatchTab gameId={selectedGame.gameId} className={styles['lobby-tabs']} leagueToogle={leagueToogle} language={this.props.language} />
                 </>
