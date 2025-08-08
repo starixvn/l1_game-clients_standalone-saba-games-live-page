@@ -1,5 +1,5 @@
 import * as gc from '@sg/sg-game-client';
-import { handle, observer } from '@sg/sg-observer';
+import { handle, observer, render } from '@sg/sg-observer';
 import { reaction } from 'mobx';
 import React from 'react';
 import { configSharedContainer } from '../_shared/components/game-base/startup';
@@ -22,9 +22,6 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     private connectionManager: ConnectionManager;
     private authReaction?: any;
     private offerGamesReaction?: any;
-    private sessionTimeoutReaction?: any;
-    private tryToConnectCountReaction?: any;
-    private usernameReaction?: any;
 
     constructor(props: { token: string }) {
         super(props);
@@ -58,49 +55,23 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         console.log('[Lobby] Component unmounting');
         this.clearReRenderGameTimeout();
 
-        // Clean up all MobX reactions
-        this.cleanupAllReactions();
-
-        // Clean up connections when lobby unmounts
-        this.cleanupLobbyConnections();
-    }
-
-    /**
-     * Clean up all MobX reactions
-     */
-    private cleanupAllReactions() {
-        console.log('[Lobby] Cleaning up all MobX reactions');
-
+        // Clean up MobX reactions
         if (this.authReaction) {
             console.log('[Lobby] Disposing authentication reaction');
             this.authReaction();
             this.authReaction = undefined;
         }
-
         if (this.offerGamesReaction) {
             console.log('[Lobby] Disposing offer games reaction');
             this.offerGamesReaction();
             this.offerGamesReaction = undefined;
         }
 
-        if (this.sessionTimeoutReaction) {
-            console.log('[Lobby] Disposing session timeout reaction');
-            this.sessionTimeoutReaction();
-            this.sessionTimeoutReaction = undefined;
-        }
-
-        if (this.tryToConnectCountReaction) {
-            console.log('[Lobby] Disposing try to connect count reaction');
-            this.tryToConnectCountReaction();
-            this.tryToConnectCountReaction = undefined;
-        }
-
-        if (this.usernameReaction) {
-            console.log('[Lobby] Disposing username reaction');
-            this.usernameReaction();
-            this.usernameReaction = undefined;
-        }
+        // Clean up connections when lobby unmounts
+        this.cleanupLobbyConnections();
     }
+
+
 
     /**
      * Clean up all connections when lobby unmounts
@@ -132,21 +103,12 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         const { token } = this.props;
         this.sso({ token });
 
-        // Set up all MobX reactions
-        this.setupAllObservers();
-    }
-
-    /**
-     * Set up all MobX reactions to replace @render decorators
-     */
-    private setupAllObservers() {
-        console.log('[Lobby] Setting up all MobX observers');
+        // Set up MobX reactions for isAuthenticated and offerGames
         this.setupAuthObserver();
         this.setupOfferGamesObserver();
-        this.setupSessionTimeoutObserver();
-        this.setupTryToConnectCountObserver();
-        this.setupUsernameObserver();
     }
+
+
 
     private setupAuthObserver() {
         console.log('[Lobby] Setting up authentication observer');
@@ -208,95 +170,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         }
     }
 
-    private setupSessionTimeoutObserver() {
-        console.log('[Lobby] Setting up session timeout observer');
-        try {
-            const container = sharedContainer;
-            if (!container) {
-                console.log('[Lobby] No container available for session timeout observer setup');
-                return;
-            }
 
-            const appStore = container.get(gc.App.AppStore);
-            if (!appStore) {
-                console.log('[Lobby] No app store available for session timeout observer setup');
-                return;
-            }
-
-            console.log('[Lobby] Creating MobX reaction for isSessionTimeout');
-            this.sessionTimeoutReaction = reaction(
-                () => appStore.isSessionTimeout,
-                (isSessionTimeout) => {
-                    console.log('[Lobby] MobX reaction triggered - Session timeout changed:', isSessionTimeout);
-                    this.redirectToSessionTimeoutPage(isSessionTimeout);
-                },
-                { fireImmediately: true },
-            );
-            console.log('[Lobby] Session timeout observer setup completed');
-        } catch (error) {
-            console.error('[Lobby] Error setting up session timeout observer:', error);
-        }
-    }
-
-    private setupTryToConnectCountObserver() {
-        console.log('[Lobby] Setting up try to connect count observer');
-        try {
-            const container = sharedContainer;
-            if (!container) {
-                console.log('[Lobby] No container available for try to connect count observer setup');
-                return;
-            }
-
-            const lobbyStore = container.get(LobbyStore);
-            if (!lobbyStore) {
-                console.log('[Lobby] No lobby store available for try to connect count observer setup');
-                return;
-            }
-
-            console.log('[Lobby] Creating MobX reaction for tryToConnectCount');
-            this.tryToConnectCountReaction = reaction(
-                () => lobbyStore.tryToConnectCount,
-                (tryToConnectCount) => {
-                    console.log('[Lobby] MobX reaction triggered - Try to connect count changed:', tryToConnectCount);
-                    this.updateTryToConnectCount(tryToConnectCount);
-                },
-                { fireImmediately: true },
-            );
-            console.log('[Lobby] Try to connect count observer setup completed');
-        } catch (error) {
-            console.error('[Lobby] Error setting up try to connect count observer:', error);
-        }
-    }
-
-    private setupUsernameObserver() {
-        console.log('[Lobby] Setting up username observer');
-        try {
-            const container = sharedContainer;
-            if (!container) {
-                console.log('[Lobby] No container available for username observer setup');
-                return;
-            }
-
-            const authStore = container.get(gc.Auth.AuthStore);
-            if (!authStore) {
-                console.log('[Lobby] No auth store available for username observer setup');
-                return;
-            }
-
-            console.log('[Lobby] Creating MobX reaction for username');
-            this.usernameReaction = reaction(
-                () => authStore.username,
-                (username) => {
-                    console.log('[Lobby] MobX reaction triggered - Username changed:', username);
-                    this.handleUsername(username);
-                },
-                { fireImmediately: true },
-            );
-            console.log('[Lobby] Username observer setup completed');
-        } catch (error) {
-            console.error('[Lobby] Error setting up username observer:', error);
-        }
-    }
 
     @handle(gc.Auth.AuthHandlers.SSO)
     sso(ssoInfo: gc.Auth.ISSOInfo) {
@@ -304,6 +178,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         return ssoInfo;
     }
 
+    @render(gc.App.AppStore, (store) => store.isSessionTimeout)
     redirectToSessionTimeoutPage(isSessionTimeout: boolean) {
         console.log('[Lobby] Session timeout status changed:', isSessionTimeout);
         this.setState({ isSessionTimeout });
@@ -406,6 +281,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         console.log('[Lobby] ===== OFFER GAMES UPDATE END =====');
     }
 
+    @render(LobbyStore, (store) => store.tryToConnectCount)
     updateTryToConnectCount(tryToConnectCount: number) {
         console.log('[Lobby] Connection retry count updated:', tryToConnectCount);
         const isDisconnect = tryToConnectCount > 0;
@@ -419,6 +295,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         }
     }
 
+    @render(gc.Auth.AuthStore, (store) => store.username)
     private handleUsername(username: string) {
         console.log('[Lobby] Username updated:', username);
         username && this.setState({ username });

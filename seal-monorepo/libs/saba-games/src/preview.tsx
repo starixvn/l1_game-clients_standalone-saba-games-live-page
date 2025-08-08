@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSentryInit } from './saba-games-index';
 import { PLATFORM_TYPE_MAPPING, PLATFORM_TYPE_NUMBER, VIVA88_SITE_ID } from '../constant/app';
