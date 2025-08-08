@@ -1,5 +1,6 @@
 import * as gc from '@sg/sg-game-client';
 import { handle, observer, render } from '@sg/sg-observer';
+import { reaction } from 'mobx';
 import React from 'react';
 import { configSharedContainer } from '../_shared/components/game-base/startup';
 import { LobbyStore } from '../_shared/states/lobby';
@@ -19,6 +20,7 @@ import { sharedContainer } from '../_shared/components/game-base/startup';
 class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     private reRenderGameTimeout?: NodeJS.Timeout;
     private connectionManager: ConnectionManager;
+    private authReaction?: any;
 
     constructor(props: { token: string }) {
         super(props);
@@ -51,6 +53,14 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     componentWillUnmount() {
         console.log('[Lobby] Component unmounting');
         this.clearReRenderGameTimeout();
+
+        // Clean up MobX reaction
+        if (this.authReaction) {
+            console.log('[Lobby] Disposing authentication reaction');
+            this.authReaction();
+            this.authReaction = undefined;
+        }
+
         // Clean up connections when lobby unmounts
         this.cleanupLobbyConnections();
     }
@@ -84,6 +94,39 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         console.log('[Lobby] Component mounted');
         const { token } = this.props;
         this.sso({ token });
+
+        // Set up MobX reaction for isAuthenticated
+        this.setupAuthObserver();
+    }
+
+    private setupAuthObserver() {
+        console.log('[Lobby] Setting up authentication observer');
+        try {
+            const container = sharedContainer;
+            if (!container) {
+                console.log('[Lobby] No container available for auth observer setup');
+                return;
+            }
+
+            const authStore = container.get(gc.Auth.AuthStore);
+            if (!authStore) {
+                console.log('[Lobby] No auth store available for observer setup');
+                return;
+            }
+
+            console.log('[Lobby] Creating MobX reaction for isAuthenticated');
+            this.authReaction = reaction(
+                () => authStore.isAuthenticated,
+                (isAuthenticated) => {
+                    console.log('[Lobby] MobX reaction triggered - Authentication state changed:', isAuthenticated);
+                    this.handleIsAuthenticated(isAuthenticated);
+                },
+                { fireImmediately: true }
+            );
+            console.log('[Lobby] Authentication observer setup completed');
+        } catch (error) {
+            console.error('[Lobby] Error setting up authentication observer:', error);
+        }
     }
 
     @handle(gc.Auth.AuthHandlers.SSO)
@@ -98,7 +141,6 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         this.setState({ isSessionTimeout });
     }
 
-    @render(gc.Auth.AuthStore, (store) => store.isAuthenticated)
     handleIsAuthenticated(isAuthenticated: boolean) {
         console.log('[Lobby] Authentication state changed:', isAuthenticated);
         this.setState({ isAuthenticated });
