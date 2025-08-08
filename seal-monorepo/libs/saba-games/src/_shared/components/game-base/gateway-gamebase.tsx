@@ -53,6 +53,7 @@ export default abstract class GatewayGameBase<P extends GameBaseProps, S extends
 
     @render(gc.Auth.AuthStore, (store) => store.isAuthorized)
     protected handleAuthorized(isAuthorized: boolean) {
+        console.log('[GatewayGameBase] Authorization state changed:', isAuthorized);
         this.setState({ isAuthorized });
     }
 
@@ -61,7 +62,9 @@ export default abstract class GatewayGameBase<P extends GameBaseProps, S extends
 
     @render(gc.GatewayConnection.GatewayConnectionStore, (store) => store.isConnected)
     handleConnectLiveGatewayForGame(isConnected: boolean) {
+        console.log('[GatewayGameBase] Gateway connection state:', isConnected);
         if (isConnected) {
+            console.log('[GatewayGameBase] Connecting to live gateway');
             this.connectLiveGateway();
         }
     }

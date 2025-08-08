@@ -18,6 +18,7 @@ declare global {
 }
 
 function getSharedContainer(siteConfigs: gc.Configs.SiteConfigs) {
+    console.log('[Startup] Creating shared container with configs:', siteConfigs);
     const containerOptions: gc.IContainerOptions = {
         onContainerCreated: (container) => {
             container.bind(gc.Configs.SiteConfigs).toConstantValue(siteConfigs);
@@ -48,7 +49,9 @@ if (typeof window !== 'undefined') {
 }
 
 export function configSharedContainer() {
+    console.log('[Startup] Configuring shared container');
     Observer.configure({ default: { mobx, container: gc.buildObserverContainer(sharedContainer) } });
+    console.log('[Startup] Observer configured with shared container');
     return sharedContainer;
 }
 

@@ -28,9 +28,11 @@ const App = ({ appEnv, token, siteId, encryptionKey }: AppProps) => {
 
     useEffect(() => {
         const initializeToken = () => {
+            console.log('[App] Initializing token');
             try {
+                console.log('[App] Attempting to decrypt token from URL');
                 const tokenFromUrl = getEncryptedTokenFromUrl(encryptionKey, token);
-                
+
                 setDecryptedToken(tokenFromUrl);
             } catch (error) {
                 setDecryptedToken(token);
@@ -47,7 +49,7 @@ const App = ({ appEnv, token, siteId, encryptionKey }: AppProps) => {
     }
 
     console.log("stand alone game decryptedToken: ", decryptedToken);
-    
+
     return (
         <MessageProvider config={createMessageHandlerConfig(appEnv, encryptionKey)} options={{}}>
             <AppProvider appEnv={appEnv} siteId={siteId}>
@@ -66,8 +68,12 @@ const AppContent = ({ token }: AppContentProps) => {
     const lastHeightRef = useRef<number>(0);
 
     useEffect(() => {
+        console.log('[AppContent] Setting up resize observer');
         const appContainer = appContainerRef.current;
-        if (!appContainer) return;
+        if (!appContainer) {
+            console.log('[AppContent] No app container found');
+            return;
+        }
         const sendInitialHeight = () => {
             const initialHeight = appContainer.offsetHeight;
             if (initialHeight > 0) {
@@ -135,13 +141,13 @@ const AppContent = ({ token }: AppContentProps) => {
 
     loadI18n(settingData?.language || 'en');
     return (
-        <div 
-            id="saba-games-app" 
+        <div
+            id="saba-games-app"
             ref={appContainerRef}
-            data-react="true" 
+            data-react="true"
             style={{ width: '100%' }}
         >
-            {token && <Lobby token={token} language={settingData?.language || 'en'} renewToken={renewToken}/>}
+            {token && <Lobby token={token} language={settingData?.language || 'en'} renewToken={renewToken} />}
         </div>
     );
 };

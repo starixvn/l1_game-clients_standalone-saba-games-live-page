@@ -78,8 +78,10 @@ export class ConnectionManager {
      * Register a gateway connection for tracking
      */
     public registerGatewayConnection(connection: any): void {
+        console.log('[ConnectionManager] Registering new gateway connection');
         if (connection && !this.connections.has(connection)) {
             this.connections.add(connection);
+            console.log('[ConnectionManager] Gateway connection registered, total connections:', this.connections.size);
         }
     }
 
@@ -200,7 +202,9 @@ export class ConnectionManager {
      * Disconnect using the gateway handler's disconnect method and close connections
      */
     public async disconnect(reason: string): Promise<void> {
+        console.log('[ConnectionManager] Disconnecting all connections, reason:', reason);
         if (this.shutdownInProgress) {
+            console.log('[ConnectionManager] Shutdown already in progress, skipping');
             return;
         }
 

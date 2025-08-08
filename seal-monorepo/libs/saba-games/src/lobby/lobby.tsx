@@ -1,5 +1,4 @@
 import * as gc from '@sg/sg-game-client';
-import { sharedContainer } from '../_shared/components/game-base/startup';
 import { handle, observer, render } from '@sg/sg-observer';
 import React from 'react';
 import { configSharedContainer } from '../_shared/components/game-base/startup';
@@ -13,10 +12,13 @@ import { GameMatchTab } from '../_shared/components/all-tab-components/game-matc
 import { IOfferGame, ILobbyState } from './type';
 import { GameListTab } from '../_shared/components/all-tab-components/game-list-tab';
 import SessionTimeout from '../_shared/components/timeout';
+import { ConnectionManager } from '../_shared/components/game-base/connection-manager';
+import { sharedContainer } from '../_shared/components/game-base/startup';
 
 @observer
 class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     private reRenderGameTimeout?: NodeJS.Timeout;
+    private connectionManager: ConnectionManager;
 
     constructor(props: { token: string }) {
         super(props);
@@ -31,7 +33,11 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
             isAuthenticated: false,
             username: '',
         };
+
+        // Initialize connection manager at lobby level
+        this.connectionManager = ConnectionManager.getInstance();
     }
+
     clearReRenderGameTimeout = () => {
         if (!this.reRenderGameTimeout) {
             return;
@@ -41,6 +47,23 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
 
     componentWillUnmount() {
         this.clearReRenderGameTimeout();
+        // Clean up connections when lobby unmounts
+        this.cleanupLobbyConnections();
+    }
+
+    /**
+     * Clean up all connections when lobby unmounts
+     */
+    private async cleanupLobbyConnections() {
+        try {
+            // Disconnect using the manager (handles both handler.disconnect() and connection.close())
+            await this.connectionManager.disconnect('lobby_unmount');
+
+            // Close all remaining connections as a safety measure (sends WebSocket close frames)
+            await this.connectionManager.closeAllGatewayConnections('lobby_unmount');
+        } catch (error) {
+            // Error during connection cleanup
+        }
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<ILobbyState>, snapshot?: any): void {
@@ -51,53 +74,61 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
 
     componentDidMount() {
         const { token } = this.props;
-        console.log('stand alone game componentDidMount', token);
-
-
-        console.log('AuthStore in componentDidMount:', gc.Auth.AuthStore);
-
-        setTimeout(() => {
-            this.sso({ token });
-        }, 2000);
+        this.sso({ token });
     }
 
     @handle(gc.Auth.AuthHandlers.SSO)
     sso(ssoInfo: gc.Auth.ISSOInfo) {
-        console.log('stand alone game ssoInfo', ssoInfo);
         return ssoInfo;
     }
 
     @render(gc.App.AppStore, (store) => store.isSessionTimeout)
     redirectToSessionTimeoutPage(isSessionTimeout: boolean) {
-        console.log('stand alone game redirectToSessionTimeoutPage', isSessionTimeout);
         this.setState({ isSessionTimeout });
     }
 
     @render(gc.Auth.AuthStore, (store) => {
-        console.log('AuthStore state:', store);
-        console.log('isAuthenticated value:', store.isAuthenticated);
-        const gatewayStore = sharedContainer.get(gc.GatewayConnection.GatewayConnectionStore);
-        console.log('Gateway connection state:', {
-            isConnected: gatewayStore.isConnected,
-            isConnectFailed: gatewayStore.isConnectFailed,
-            isDisconnect: gatewayStore.isDisconnect
+        console.log("[Lobby] Auth store changed:", {
+            isAuthenticated: store.isAuthenticated,
+            username: store.username
         });
         return store.isAuthenticated;
     })
     handleIsAuthenticated(isAuthenticated: boolean) {
-        console.log('stand alone game handleIsAuthenticated', isAuthenticated);
+        console.log("[Lobby] handleIsAuthenticated called with:", isAuthenticated);
         this.setState({ isAuthenticated });
         if (isAuthenticated) {
+            console.log("[Lobby] User authenticated, connecting to gateway");
             this.connectLiveGateway();
         }
     }
 
     @handle(gc.GatewayConnection.GatewayConnectionHandlers.ConnectHandler)
     connectLiveGateway() {
-        const gatewayConnectionStore = sharedContainer.get(gc.GatewayConnection.GatewayConnectionStore);
-        if (!gatewayConnectionStore.isConnected) {
-            console.log('Attempting to connect to gateway...');
-            gatewayConnectionStore.initConnection();
+        // Register the connection when it's established
+        const handler = this.getConnectionHandler();
+
+        if (handler && (handler as any).connection) {
+            this.connectionManager.registerGatewayConnection((handler as any).connection);
+        }
+    }
+
+    /**
+     * Get connection handler from the container
+     */
+    private getConnectionHandler(): any {
+        try {
+            const container = sharedContainer;
+
+            if (!container) {
+                return null;
+            }
+
+            const handler = container.get(gc.GatewayConnection.GatewayConnectionHandlers.ConnectHandler);
+
+            return handler;
+        } catch (error) {
+            return null;
         }
     }
 
@@ -160,7 +191,6 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
             }
 
             const hasGames = offerGames.length > 0;
-            console.log("stand alone game", hasGames, isAuthenticated);
             if (!hasGames || !isAuthenticated) {
                 return <Loading />;
             }
@@ -174,7 +204,15 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
                         selectedGameId={selectedGameId}
                         onTabClick={this.handleTabClick}
                     />
-                    <GameMatchTab gameId={selectedGame.gameId} className={styles['lobby-tabs']} leagueToogle={leagueToogle} language={this.props.language} />
+                    {/* Use the same pattern as preview.tsx - single component with key-based rendering */}
+                    <div key={selectedGameId} style={{ height: '100%' }}>
+                        <GameMatchTab
+                            gameId={selectedGame.gameId}
+                            className={styles['lobby-tabs']}
+                            leagueToogle={leagueToogle}
+                            language={this.props.language}
+                        />
+                    </div>
                 </>
             );
         };

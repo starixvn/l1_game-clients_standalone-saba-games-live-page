@@ -5,7 +5,8 @@ import SabaGamesGroup from './index';
 import Preview from './preview';
 
 const ErrorFallback = ({ error }) => {
-    console.error('Error in application:', error);
+    console.log('[Main] Application error occurred');
+    console.error('[Main] Error details:', error);
     return (
         <div role="alert">
             <p>Something went wrong:</p>
@@ -17,8 +18,10 @@ const ErrorFallback = ({ error }) => {
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
 const isDevelopment = process.env.NODE_ENV === 'development';
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('isDevelopment:', isDevelopment);
+console.log('[Main] Environment:', {
+    NODE_ENV: process.env.NODE_ENV,
+    isDevelopment: isDevelopment
+});
 const App = isDevelopment ? Preview : SabaGamesGroup;
 
 // const App = Preview;
