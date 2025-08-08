@@ -7,32 +7,40 @@ import { useEffect, useState, useRef } from 'react';
 import { createMessageHandlerConfig } from './_shared/utils/message-handler-manager';
 import { MessageProvider } from './_shared/contexts/message-context';
 import { useSettingsData } from './hooks/use-message-data';
-import { getEncryptedTokenFromUrl } from './_shared/utils/url-token-helper';
+import { getEncryptedTokenFromUrl, getRawTokenFromUrl, hasRawTokenInUrl } from './_shared/utils/url-token-helper';
 import { useMessageContext } from './_shared/contexts/message-context';
 import { MessageType } from './_shared/types/message-types';
 
-interface AppProps extends AppContentProps {
+interface IAppProps extends IAppContentProps {
     appEnv: string;
     siteId: string;
     language: string;
     encryptionKey: string;
 }
 
-interface AppContentProps {
+interface IAppContentProps {
     token: string;
 }
 
-const App = ({ appEnv, token, siteId, encryptionKey }: AppProps) => {
+const App = ({ appEnv, token, siteId, encryptionKey }: IAppProps) => {
     const [decryptedToken, setDecryptedToken] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const initializeToken = () => {
             try {
-                const tokenFromUrl = getEncryptedTokenFromUrl(encryptionKey, token);
-                
-                setDecryptedToken(tokenFromUrl);
+                // Check if raw token is available in URL (for testing)
+                if (hasRawTokenInUrl()) {
+                    const rawTokenFromUrl = getRawTokenFromUrl(token);
+                    console.log('Using raw token from URL for testing');
+                    setDecryptedToken(rawTokenFromUrl);
+                } else {
+                    // Use encrypted token from URL
+                    const tokenFromUrl = getEncryptedTokenFromUrl(encryptionKey, token);
+                    setDecryptedToken(tokenFromUrl);
+                }
             } catch (error) {
+                console.error('Error initializing token:', error);
                 setDecryptedToken(token);
             } finally {
                 setIsLoading(false);
@@ -46,8 +54,8 @@ const App = ({ appEnv, token, siteId, encryptionKey }: AppProps) => {
         return <div>Loading...</div>;
     }
 
-    console.log("stand alone game decryptedToken: ", decryptedToken);
-    
+    console.log('stand alone game decryptedToken: ', decryptedToken);
+
     return (
         <MessageProvider config={createMessageHandlerConfig(appEnv, encryptionKey)} options={{}}>
             <AppProvider appEnv={appEnv} siteId={siteId}>
@@ -57,7 +65,7 @@ const App = ({ appEnv, token, siteId, encryptionKey }: AppProps) => {
     );
 };
 
-const AppContent = ({ token }: AppContentProps) => {
+const AppContent = ({ token }: IAppContentProps) => {
     const settingData = useSettingsData();
     const { sendMessage } = useMessageContext();
     const appContainerRef = useRef<HTMLDivElement>(null);
@@ -74,8 +82,8 @@ const AppContent = ({ token }: AppContentProps) => {
                 const heightMessage = {
                     type: MessageType.SET_HEIGHT,
                     data: {
-                        height: initialHeight
-                    }
+                        height: initialHeight,
+                    },
                 } as const;
 
                 sendMessage(heightMessage);
@@ -96,8 +104,8 @@ const AppContent = ({ token }: AppContentProps) => {
                 const heightMessage = {
                     type: MessageType.SET_HEIGHT,
                     data: {
-                        height: newHeight
-                    }
+                        height: newHeight,
+                    },
                 } as const;
 
                 sendMessage(heightMessage);
@@ -135,13 +143,8 @@ const AppContent = ({ token }: AppContentProps) => {
 
     loadI18n(settingData?.language || 'en');
     return (
-        <div 
-            id="saba-games-app" 
-            ref={appContainerRef}
-            data-react="true" 
-            style={{ width: '100%' }}
-        >
-            {token && <Lobby token={token} language={settingData?.language || 'en'} renewToken={renewToken}/>}
+        <div id='saba-games-app' ref={appContainerRef} data-react='true' style={{ width: '100%' }}>
+            {token && <Lobby token={token} language={settingData?.language || 'en'} renewToken={renewToken} />}
         </div>
     );
 };

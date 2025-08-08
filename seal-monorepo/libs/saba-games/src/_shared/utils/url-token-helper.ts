@@ -7,13 +7,13 @@ import { MessageEncryption } from '../../utils/encryption';
  */
 export const getEncryptedTokenFromUrl = (
     encryptionKey: string,
-    fallbackToken: string = '',
-    paramName: string = 'token'
+    fallbackToken = '',
+    paramName = 'token'
 ): string => {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const encryptedTokenParam = urlParams.get(paramName);
-        
+
         if (!encryptedTokenParam) {
             console.log('No encrypted token parameter found in URL');
             return fallbackToken;
@@ -25,17 +25,17 @@ export const getEncryptedTokenFromUrl = (
         }
 
         const messageEncryption = new MessageEncryption(encryptionKey);
-        
+
         try {
             const encryptedToken = JSON.parse(encryptedTokenParam);
-            
+
             if (!encryptedToken.encryptedData || !encryptedToken.iv) {
                 console.warn('Invalid encrypted token format');
                 return fallbackToken;
             }
-            
+
             const decryptedData = messageEncryption.decrypt(encryptedToken);
-            
+
             if (decryptedData && decryptedData.token) {
                 console.log('Successfully decrypted token from URL');
                 return decryptedData.token;
@@ -43,12 +43,12 @@ export const getEncryptedTokenFromUrl = (
                 console.warn('Decrypted data does not contain token field');
                 return fallbackToken;
             }
-            
+
         } catch (decryptError) {
             console.error('Failed to decrypt token from URL:', decryptError);
             return fallbackToken;
         }
-        
+
     } catch (error) {
         console.error('Error processing URL token:', error);
         return fallbackToken;
@@ -56,13 +56,39 @@ export const getEncryptedTokenFromUrl = (
 };
 
 /**
+ * 從 URL 參數中獲取原始 token（用於測試）
+ * 處理格式：URL 參數直接包含 token 字符串
+ */
+export const getRawTokenFromUrl = (
+    fallbackToken = '',
+    paramName = 'rawToken'
+): string => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const rawTokenParam = urlParams.get(paramName);
+
+        if (!rawTokenParam) {
+            console.log('No raw token parameter found in URL');
+            return fallbackToken;
+        }
+
+        console.log('Successfully retrieved raw token from URL');
+        return rawTokenParam;
+
+    } catch (error) {
+        console.error('Error processing raw URL token:', error);
+        return fallbackToken;
+    }
+};
+
+/**
  * 檢查 URL 是否包含加密的 token 參數
  */
-export const hasEncryptedTokenInUrl = (paramName: string = 'token'): boolean => {
+export const hasEncryptedTokenInUrl = (paramName = 'token'): boolean => {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const encryptedTokenParam = urlParams.get(paramName);
-        
+
         if (!encryptedTokenParam) {
             return false;
         }
@@ -75,9 +101,22 @@ export const hasEncryptedTokenInUrl = (paramName: string = 'token'): boolean => 
 };
 
 /**
+ * 檢查 URL 是否包含原始 token 參數
+ */
+export const hasRawTokenInUrl = (paramName = 'rawToken'): boolean => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const rawTokenParam = urlParams.get(paramName);
+        return !!rawTokenParam;
+    } catch {
+        return false;
+    }
+};
+
+/**
  * 清理 URL 中的 token 參數（安全考慮）
  */
-export const cleanTokenFromUrl = (paramName: string = 'token'): void => {
+export const cleanTokenFromUrl = (paramName = 'token'): void => {
     try {
         const url = new URL(window.location.href);
         url.searchParams.delete(paramName);
@@ -86,5 +125,20 @@ export const cleanTokenFromUrl = (paramName: string = 'token'): void => {
         console.log('Cleaned token parameter from URL');
     } catch (error) {
         console.warn('Failed to clean token from URL:', error);
+    }
+};
+
+/**
+ * 清理 URL 中的原始 token 參數（安全考慮）
+ */
+export const cleanRawTokenFromUrl = (paramName = 'rawToken'): void => {
+    try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete(paramName);
+
+        window.history.replaceState({}, document.title, url.toString());
+        console.log('Cleaned raw token parameter from URL');
+    } catch (error) {
+        console.warn('Failed to clean raw token from URL:', error);
     }
 }; 
