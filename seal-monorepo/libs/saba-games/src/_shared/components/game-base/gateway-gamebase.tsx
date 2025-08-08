@@ -76,30 +76,66 @@ export default abstract class GatewayGameBase<P extends GameBaseProps, S extends
     @render(gc.GatewayConnection.GatewayConnectionStore, (store) => store.isConnected)
     handleConnectLiveGatewayForGame(isConnected: boolean) {
         console.log('[GatewayGameBase] Gateway connection state:', isConnected);
+        console.log('[GatewayGameBase] ===== GATEWAY CONNECTION STATE CHANGE =====');
+        console.log('[GatewayGameBase] Connection state details:', {
+            isConnected,
+            isAuthorized: this.state.isAuthorized,
+            isSignedIn: this.state.isSignedIn
+        });
+
         if (isConnected) {
-            console.log('[GatewayGameBase] Connecting to live gateway');
+            console.log('[GatewayGameBase] Gateway connected, triggering live gateway connection');
             this.connectLiveGateway();
+        } else {
+            console.log('[GatewayGameBase] Gateway disconnected, not proceeding with live gateway');
         }
+
+        console.log('[GatewayGameBase] ===== GATEWAY CONNECTION STATE CHANGE END =====');
     }
 
     @handle(gc.Connection.ConnectionHandlers.ConnectHandler, (handler) => handler.handleGateway())
     connectLiveGateway() {
         console.log('[GatewayGameBase] Gateway connection handled at lobby level');
+        console.log('[GatewayGameBase] ===== LIVE GATEWAY CONNECTION HANDLED =====');
+        console.log('[GatewayGameBase] Current game state:', {
+            namespace: this.props.namespace,
+            isAuthorized: this.state.isAuthorized,
+            isSignedIn: this.state.isSignedIn
+        });
+        console.log('[GatewayGameBase] ===== LIVE GATEWAY CONNECTION HANDLED END =====');
     }
 
     @render(gc.Connection.ConnectionStore, (store) => store.isConnected)
     handleJoinGame(isConnected: boolean) {
         console.log('[GatewayGameBase] Game connection state:', isConnected);
+        console.log('[GatewayGameBase] ===== GAME CONNECTION STATE CHANGE =====');
+        console.log('[GatewayGameBase] Game connection details:', {
+            isConnected,
+            namespace: this.props.namespace,
+            isAuthorized: this.state.isAuthorized
+        });
+
         if (isConnected) {
-            console.log('[GatewayGameBase] Joining game');
+            console.log('[GatewayGameBase] Game connected, proceeding to join game');
             this.joinGame();
+        } else {
+            console.log('[GatewayGameBase] Game disconnected, not joining game');
         }
+
+        console.log('[GatewayGameBase] ===== GAME CONNECTION STATE CHANGE END =====');
     }
 
     @handle(gc.Connection.ConnectionHandlers.JoinGameHandler)
     joinGame() {
+        console.log('[GatewayGameBase] ===== JOINING GAME =====');
+        console.log('[GatewayGameBase] Joining game for namespace:', this.props.namespace);
+        console.log('[GatewayGameBase] Current authorization state:', {
+            isAuthorized: this.state.isAuthorized,
+            isSignedIn: this.state.isSignedIn
+        });
         console.log('[GatewayGameBase] Processing join game authorization');
         this.processAuthorizationIfRoundMatches(this.state.roundId);
+        console.log('[GatewayGameBase] ===== JOINING GAME END =====');
     }
 
     @handle(gc.Connection.ConnectionHandlers.SignInHandler)

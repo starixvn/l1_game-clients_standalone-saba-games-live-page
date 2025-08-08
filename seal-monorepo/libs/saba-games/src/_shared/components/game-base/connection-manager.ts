@@ -87,10 +87,41 @@ export class ConnectionManager {
      */
     public registerGatewayConnection(connection: any): void {
         console.log('[ConnectionManager] Registering new gateway connection');
+        console.log('[ConnectionManager] ===== GATEWAY CONNECTION REGISTRATION =====');
+        console.log('[ConnectionManager] Connection details:', {
+            exists: !!connection,
+            id: connection?.id,
+            connected: connection?.connected,
+            disconnected: connection?.disconnected
+        });
+
         if (connection && !this.connections.has(connection)) {
             this.connections.add(connection);
-            console.log('[ConnectionManager] Connection registered, total connections:', this.connections.size);
+            console.log('[ConnectionManager] Connection registered successfully');
+            console.log('[ConnectionManager] Total active connections:', this.connections.size);
+
+            // Add connection state logging
+            if (connection.on) {
+                connection.on('connect', () => {
+                    console.log('[ConnectionManager] Registered connection connected, ID:', connection.id);
+                });
+
+                connection.on('disconnect', (reason: string) => {
+                    console.log('[ConnectionManager] Registered connection disconnected, ID:', connection.id, 'Reason:', reason);
+                });
+
+                connection.on('error', (error: any) => {
+                    console.error('[ConnectionManager] Registered connection error, ID:', connection.id, 'Error:', error);
+                });
+            }
+        } else {
+            console.log('[ConnectionManager] Connection not registered:', {
+                connectionExists: !!connection,
+                alreadyRegistered: connection ? this.connections.has(connection) : false
+            });
         }
+
+        console.log('[ConnectionManager] ===== GATEWAY CONNECTION REGISTRATION END =====');
     }
 
     /**

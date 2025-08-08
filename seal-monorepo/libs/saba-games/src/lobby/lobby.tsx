@@ -111,13 +111,33 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     @handle(gc.GatewayConnection.GatewayConnectionHandlers.ConnectHandler)
     connectLiveGateway() {
         console.log('[Lobby] Connecting to live gateway');
+        console.log('[Lobby] ===== GATEWAY CONNECTION FLOW START =====');
+        console.log('[Lobby] Current state:', {
+            isAuthenticated: this.state.isAuthenticated,
+            isSessionTimeout: this.state.isSessionTimeout,
+            username: this.state.username
+        });
+
         // Register the connection when it's established
         const handler = this.getConnectionHandler();
 
         if (handler && (handler as any).connection) {
             console.log('[Lobby] Registering gateway connection');
+            console.log('[Lobby] Handler details:', {
+                hasConnection: !!(handler as any).connection,
+                connectionId: (handler as any).connection?.id,
+                connectionState: (handler as any).connection?.connected
+            });
+
             this.connectionManager.registerGatewayConnection((handler as any).connection);
+            console.log('[Lobby] Gateway connection registered successfully');
+        } else {
+            console.log('[Lobby] No handler or connection available for registration');
+            console.log('[Lobby] Handler available:', !!handler);
+            console.log('[Lobby] Handler connection available:', !!(handler as any)?.connection);
         }
+
+        console.log('[Lobby] ===== GATEWAY CONNECTION FLOW END =====');
     }
 
     /**
