@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import './styles/main.scss';
 import './_shared/utils/string-helper';
 import { loadI18n } from './i18n';

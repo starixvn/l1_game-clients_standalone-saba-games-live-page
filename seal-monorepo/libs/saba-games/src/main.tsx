@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as ReactDOM from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -16,7 +17,7 @@ const ErrorFallback = ({ error }) => {
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
-const isDevelopment = process.env.NODE_ENV === 'development';
+const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'UAT';
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('isDevelopment:', isDevelopment);
 const App = isDevelopment ? Preview : SabaGamesGroup;

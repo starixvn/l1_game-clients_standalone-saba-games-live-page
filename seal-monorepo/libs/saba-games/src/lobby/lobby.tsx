@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as gc from '@sg/sg-game-client';
 import { handle, observer, render } from '@sg/sg-observer';
 import React from 'react';
