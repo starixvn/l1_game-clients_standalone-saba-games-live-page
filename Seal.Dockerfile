@@ -10,29 +10,38 @@ ARG DEPLOY_ENV
 ENV PORT=$PORT
 ENV DEPLOY_ENV=$DEPLOY_ENV
 
+# Set Node.js memory limit and optimization flags
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NPM_CONFIG_CACHE=/tmp/npm-cache
+ENV NPM_CONFIG_PREFER_OFFLINE=true
+
 # Copy package files from seal-monorepo directory
 COPY seal-monorepo/package*.json ./
 
-# Install dependencies with comprehensive registry configuration
+# Install dependencies with comprehensive registry configuration and memory optimization
 RUN npm config set registry http://npm.lumigame.com && \
     npm config set @sg:registry http://npm.lumigame.com && \
     npm config set @lumigame:registry http://npm.lumigame.com && \
     npm config set strict-ssl false && \
-    npm install --no-audit --no-fund --verbose && \
+    npm config set maxsockets 1 && \
+    npm config set fetch-retries 3 && \
+    npm config set fetch-retry-mintimeout 5000 && \
+    npm config set fetch-retry-maxtimeout 60000 && \
+    npm install --no-audit --no-fund --verbose --production=false && \
     npm install -g cross-env nx
 
 # Copy the rest of the application
 COPY . .
 
-# Build the application based on DEPLOY_ENV
+# Build the application based on DEPLOY_ENV with memory optimization
 WORKDIR /app/seal-monorepo
-RUN npm install && \
+RUN npm install --no-audit --no-fund --verbose --production=false && \
     nx reset && \
     if echo "$DEPLOY_ENV" | grep -q "^LOCAL_"; then \
-        cross-env NODE_ENV=development nx build saba-games && \
+        cross-env NODE_ENV=development NODE_OPTIONS="--max-old-space-size=4096" nx build saba-games && \
         echo "Build completed successfully for development (${DEPLOY_ENV})"; \
     else \
-        cross-env NODE_ENV=$DEPLOY_ENV nx build:$DEPLOY_ENV saba-games && \
+        cross-env NODE_ENV=$DEPLOY_ENV NODE_OPTIONS="--max-old-space-size=4096" nx build:$DEPLOY_ENV saba-games && \
         echo "Build completed successfully for $DEPLOY_ENV"; \
     fi
 
