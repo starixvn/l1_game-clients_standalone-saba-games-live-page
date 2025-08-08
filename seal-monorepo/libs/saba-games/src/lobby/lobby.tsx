@@ -21,6 +21,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     private reRenderGameTimeout?: NodeJS.Timeout;
     private connectionManager: ConnectionManager;
     private authReaction?: any;
+    private offerGamesReaction?: any;
 
     constructor(props: { token: string }) {
         super(props);
@@ -54,11 +55,16 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         console.log('[Lobby] Component unmounting');
         this.clearReRenderGameTimeout();
 
-        // Clean up MobX reaction
+        // Clean up MobX reactions
         if (this.authReaction) {
             console.log('[Lobby] Disposing authentication reaction');
             this.authReaction();
             this.authReaction = undefined;
+        }
+        if (this.offerGamesReaction) {
+            console.log('[Lobby] Disposing offer games reaction');
+            this.offerGamesReaction();
+            this.offerGamesReaction = undefined;
         }
 
         // Clean up connections when lobby unmounts
@@ -95,8 +101,9 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         const { token } = this.props;
         this.sso({ token });
 
-        // Set up MobX reaction for isAuthenticated
+        // Set up MobX reactions for isAuthenticated and offerGames
         this.setupAuthObserver();
+        this.setupOfferGamesObserver();
     }
 
     private setupAuthObserver() {
@@ -126,6 +133,36 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
             console.log('[Lobby] Authentication observer setup completed');
         } catch (error) {
             console.error('[Lobby] Error setting up authentication observer:', error);
+        }
+    }
+
+    private setupOfferGamesObserver() {
+        console.log('[Lobby] Setting up offer games observer');
+        try {
+            const container = sharedContainer;
+            if (!container) {
+                console.log('[Lobby] No container available for offer games observer setup');
+                return;
+            }
+
+            const mainPlayerStore = container.get(gc.Player.MainPlayerStore);
+            if (!mainPlayerStore) {
+                console.log('[Lobby] No main player store available for observer setup');
+                return;
+            }
+
+            console.log('[Lobby] Creating MobX reaction for offerGames');
+            this.offerGamesReaction = reaction(
+                () => mainPlayerStore.offerGames,
+                (offerGames) => {
+                    console.log('[Lobby] MobX reaction triggered - Offer games changed:', offerGames?.length);
+                    this.handleOfferGames(offerGames);
+                },
+                { fireImmediately: true }
+            );
+            console.log('[Lobby] Offer games observer setup completed');
+        } catch (error) {
+            console.error('[Lobby] Error setting up offer games observer:', error);
         }
     }
 
@@ -204,17 +241,18 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         }
     }
 
-    @render(gc.Player.MainPlayerStore, (store) => store.offerGames)
-    handleOfferGames(offerGames: IOfferGame[]) {
+    handleOfferGames(offerGames: any[] | undefined) {
         console.log('[Lobby] ===== OFFER GAMES UPDATE =====');
-        console.log('[Lobby] @render decorator triggered for offerGames');
+        console.log('[Lobby] MobX reaction triggered for offerGames');
         console.log('[Lobby] Handling offer games update:', offerGames?.length);
         console.log('[Lobby] Offer games data:', offerGames);
         console.log('[Lobby] Offer games type:', typeof offerGames);
         console.log('[Lobby] Offer games is array:', Array.isArray(offerGames));
 
-        if (offerGames?.length > 0) {
-            const filteredOfferGames = lobbyUtils.getFilteredGames(offerGames);
+        if (offerGames && offerGames.length > 0) {
+            // Convert IOfferGame[] to { gameId: number }[] for getFilteredGames
+            const offerGamesForFilter = offerGames.map(game => ({ gameId: game.gameId }));
+            const filteredOfferGames = lobbyUtils.getFilteredGames(offerGamesForFilter);
             console.log('[Lobby] Filtered offer games:', filteredOfferGames);
             const expandedGames = filteredOfferGames.reduce(
                 (acc, game) => {
