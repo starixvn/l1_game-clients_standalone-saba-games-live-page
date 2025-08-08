@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import * as ReactDOM from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
 
