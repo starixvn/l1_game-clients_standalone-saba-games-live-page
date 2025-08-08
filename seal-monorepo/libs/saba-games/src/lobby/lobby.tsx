@@ -207,8 +207,12 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     @render(gc.Player.MainPlayerStore, (store) => store.offerGames)
     handleOfferGames(offerGames: IOfferGame[]) {
         console.log('[Lobby] ===== OFFER GAMES UPDATE =====');
+        console.log('[Lobby] @render decorator triggered for offerGames');
         console.log('[Lobby] Handling offer games update:', offerGames?.length);
         console.log('[Lobby] Offer games data:', offerGames);
+        console.log('[Lobby] Offer games type:', typeof offerGames);
+        console.log('[Lobby] Offer games is array:', Array.isArray(offerGames));
+
         if (offerGames?.length > 0) {
             const filteredOfferGames = lobbyUtils.getFilteredGames(offerGames);
             console.log('[Lobby] Filtered offer games:', filteredOfferGames);
@@ -228,6 +232,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
             }
         } else {
             console.log('[Lobby] No offer games available or empty array');
+            console.log('[Lobby] offerGames value:', offerGames);
         }
         console.log('[Lobby] ===== OFFER GAMES UPDATE END =====');
     }
