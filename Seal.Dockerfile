@@ -32,8 +32,8 @@ RUN npm install && \
         cross-env NODE_ENV=development nx build saba-games && \
         echo "Build completed successfully for development (${DEPLOY_ENV})"; \
     else \
-        cross-env NODE_ENV=$DEPLOY_ENV nx build:$DEPLOY_ENV saba-games && \
-        echo "Build completed successfully for $DEPLOY_ENV"; \
+        cross-env NODE_ENV=development nx build:$DEPLOY_ENV saba-games && \
+        echo "Build completed successfully for $DEPLOY_ENV (using development config)"; \
     fi
 
 # Production stage
