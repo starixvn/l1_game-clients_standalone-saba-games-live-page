@@ -24,12 +24,17 @@ RUN npm config set registry http://npm.lumigame.com && \
 # Copy the rest of the application
 COPY . .
 
-# Build the application with NODE_ENV=development for all environments
+# Build the application based on DEPLOY_ENV
 WORKDIR /app/seal-monorepo
 RUN npm install && \
     nx reset && \
-    cross-env NODE_ENV=development nx build saba-games && \
-    echo "Build completed successfully for ${DEPLOY_ENV} (using development config)"
+    if echo "$DEPLOY_ENV" | grep -q "^LOCAL_"; then \
+        cross-env NODE_ENV=development nx build saba-games && \
+        echo "Build completed successfully for development (${DEPLOY_ENV})"; \
+    else \
+        cross-env NODE_ENV=development nx build:$DEPLOY_ENV saba-games && \
+        echo "Build completed successfully for $DEPLOY_ENV (using development config)"; \
+    fi
 
 # Production stage
 FROM hub.lumigame.com/base/nginx:stable-alpine-slim
