@@ -14,7 +14,7 @@ import SG_GAME_SETTINGS from '../../../configs/saba-game-settings.json';
 import VG_GAME_SETTINGS from '../../../configs/vg-game-settings.json';
 import { NOVA88_SITE_ID, VIVA88_SITE_ID } from '../../../constant/app';
 
-// LOCAL development
+// Environment configuration
 export const reuqestSSO_APP_ENV = 'LOCAL';
 export const requestSSO_SITE_ID = VIVA88_SITE_ID;
 export enum APP_ENV {
@@ -25,6 +25,7 @@ export enum APP_ENV {
 }
 
 export const getEnvironmentConfig = ({ appEnv, siteId }) => {
+    console.log('[AppSettings] Getting environment config for:', { appEnv, siteId });
     const configMaps = {
         [NOVA88_SITE_ID]: {
             LOCAL: VG_LOCAL_CONFIG,
@@ -47,23 +48,20 @@ export const getEnvironmentConfig = ({ appEnv, siteId }) => {
     }
     const gameSettings = gameSettingsMap[siteId];
 
+    console.log('[AppSettings] Environment config loaded:', { environmentsConfig, gameSettings });
     return {
         ...environmentsConfig,
         gameSettings
     };
 }
 
-// TODO refactor
-// 所有設定相關函數都接收 AppConfig：
-// getEnvironmentConfig({ siteId, appEnv })
-// getSiteConfig(gameId, { siteId, appEnv })
-// getGameSetting(gameId, { siteId, appEnv })
 export const appSettings = getEnvironmentConfig({
     appEnv: APP_ENV.LOCAL,
     siteId: VIVA88_SITE_ID
 });
 
 export const getSiteConfig = (gameId: number) => {
+    console.log('[AppSettings] Getting site config for game:', gameId);
     const gameSetting = appSettings.gameSettings[gameId];
     const config: gc.Configs.SiteConfigs = {
         isDev: false,
@@ -81,20 +79,25 @@ export const getSiteConfig = (gameId: number) => {
         userServicePath: appSettings.userServicePath,
     };
 
+    console.log('[AppSettings] Site config generated:', config);
     return config;
 };
 
 export const getGameSetting = (gameId: number) => {
+    console.log('[AppSettings] Getting game settings for:', gameId);
     const settings = appSettings.gameSettings[gameId];
 
     if (!settings) {
+        console.log('[AppSettings] No settings found for game:', gameId);
         return null;
     }
 
+    console.log('[AppSettings] Game settings found:', settings);
     return settings;
 };
 
 export const getGameSettingIds = (visibleOnly: boolean = true) => {
+    console.log('[AppSettings] Getting game setting IDs, visibleOnly:', visibleOnly);
     const gameSettings = Object.keys(appSettings.gameSettings).map((value) => {
         return appSettings.gameSettings[value];
     });
@@ -104,18 +107,22 @@ export const getGameSettingIds = (visibleOnly: boolean = true) => {
         : gameSettings;
 
     const orderedGameSettings = filteredSettings.sort((a, b) => a.order - b.order);
-
     const ids = orderedGameSettings.map((value) => value.id);
+
+    console.log('[AppSettings] Game setting IDs:', ids);
     return ids;
 };
 
 export const getVisibleGameSettings = () => {
+    console.log('[AppSettings] Getting visible game settings');
     const gameSettings = Object.keys(appSettings.gameSettings).map((value) => {
         return appSettings.gameSettings[value];
     });
 
-    return gameSettings
+    const visibleSettings = gameSettings
         .filter(setting => setting.isVisible)
         .sort((a, b) => a.order - b.order);
-};
 
+    console.log('[AppSettings] Visible game settings:', visibleSettings);
+    return visibleSettings;
+};

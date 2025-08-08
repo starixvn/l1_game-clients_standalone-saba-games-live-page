@@ -7,13 +7,13 @@ import { getSiteConfig, appSettings } from '../../app-settings';
 import { Lobby } from '../../states';
 import { LobbyStore } from '../../states/lobby';
 
-interface Languages {
+interface ILanguages {
     [key: string]: any;
 }
 
 declare global {
     interface Window {
-        languages: Languages;
+        languages: ILanguages;
     }
 }
 
@@ -21,6 +21,7 @@ function getSharedContainer(siteConfigs: gc.Configs.SiteConfigs) {
     console.log('[Startup] Creating shared container with configs:', siteConfigs);
     const containerOptions: gc.IContainerOptions = {
         onContainerCreated: (container) => {
+            console.log('[Startup] Container created, binding site configs');
             container.bind(gc.Configs.SiteConfigs).toConstantValue(siteConfigs);
         },
 
@@ -38,31 +39,44 @@ function getSharedContainer(siteConfigs: gc.Configs.SiteConfigs) {
         features: [...gc.defaultFeatures, Lobby],
     };
 
+    console.log('[Startup] Container options configured:', {
+        enabledFeatures: containerOptions.enabledFeatures,
+        featuresCount: containerOptions?.features?.length
+    });
+
     return gc.getContainer(containerOptions);
 }
 
+console.log('[Startup] Initializing shared container with game ID:', appSettings.defaultGameId);
 export const sharedContainer = getSharedContainer(getSiteConfig(appSettings.defaultGameId));
 
 // Make the shared container available globally for external access
 if (typeof window !== 'undefined') {
+    console.log('[Startup] Making shared container globally available');
     (window as any).saba_games_shared_container = sharedContainer;
 }
 
 export function configSharedContainer() {
-    console.log('[Startup] Configuring shared container');
+    console.log('[Startup] Configuring shared container with observer');
     Observer.configure({ default: { mobx, container: gc.buildObserverContainer(sharedContainer) } });
-    console.log('[Startup] Observer configured with shared container');
+    console.log('[Startup] Shared container configuration complete');
     return sharedContainer;
 }
 
 export function configGameContainer(gameName: string, containerOptions: gc.IContainerOptions) {
+    console.log('[Startup] Configuring game container for:', gameName);
     const container = gc.getContainer(containerOptions);
 
+    console.log('[Startup] Getting lobby store from shared container');
     const lobbyStore = sharedContainer.get(LobbyStore);
     container.bind(LobbyStore).toConstantValue(lobbyStore);
 
+    console.log('[Startup] Building observer container');
     const observerContainer = gc.buildObserverContainer(container);
 
+    console.log('[Startup] Configuring observer for game:', gameName);
     Observer.configure({ [gameName]: { mobx: { reaction }, container: observerContainer } });
+
+    console.log('[Startup] Game container configuration complete');
     return container;
 }

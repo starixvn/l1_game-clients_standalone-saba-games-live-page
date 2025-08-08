@@ -22,6 +22,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
 
     constructor(props: { token: string }) {
         super(props);
+        console.log('[Lobby] Initializing with props:', props);
         configSharedContainer();
         this.state = {
             offerGames: [],
@@ -36,9 +37,11 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
 
         // Initialize connection manager at lobby level
         this.connectionManager = ConnectionManager.getInstance();
+        console.log('[Lobby] Connection manager initialized');
     }
 
     clearReRenderGameTimeout = () => {
+        console.log('[Lobby] Clearing re-render timeout');
         if (!this.reRenderGameTimeout) {
             return;
         }
@@ -46,6 +49,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     };
 
     componentWillUnmount() {
+        console.log('[Lobby] Component unmounting');
         this.clearReRenderGameTimeout();
         // Clean up connections when lobby unmounts
         this.cleanupLobbyConnections();
@@ -55,60 +59,63 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
      * Clean up all connections when lobby unmounts
      */
     private async cleanupLobbyConnections() {
+        console.log('[Lobby] Cleaning up lobby connections');
         try {
             // Disconnect using the manager (handles both handler.disconnect() and connection.close())
             await this.connectionManager.disconnect('lobby_unmount');
 
             // Close all remaining connections as a safety measure (sends WebSocket close frames)
             await this.connectionManager.closeAllGatewayConnections('lobby_unmount');
+            console.log('[Lobby] Connection cleanup completed');
         } catch (error) {
-            // Error during connection cleanup
+            console.error('[Lobby] Error during connection cleanup:', error);
         }
     }
 
     componentDidUpdate(prevProps: Readonly<any>, prevState: Readonly<ILobbyState>, snapshot?: any): void {
+        console.log('[Lobby] Component updated, checking token change');
         if (prevProps.token !== this.props.token) {
+            console.log('[Lobby] Token changed, initiating SSO');
             this.sso({ token: this.props.token });
         }
     }
 
     componentDidMount() {
+        console.log('[Lobby] Component mounted');
         const { token } = this.props;
         this.sso({ token });
     }
 
     @handle(gc.Auth.AuthHandlers.SSO)
     sso(ssoInfo: gc.Auth.ISSOInfo) {
+        console.log('[Lobby] Handling SSO with info:', ssoInfo);
         return ssoInfo;
     }
 
     @render(gc.App.AppStore, (store) => store.isSessionTimeout)
     redirectToSessionTimeoutPage(isSessionTimeout: boolean) {
+        console.log('[Lobby] Session timeout status changed:', isSessionTimeout);
         this.setState({ isSessionTimeout });
     }
 
-    @render(gc.Auth.AuthStore, (store) => {
-        console.log("[Lobby] Auth store changed:", {
-            isAuthenticated: store.isAuthenticated,
-            username: store.username
-        });
-        return store.isAuthenticated;
-    })
+    @render(gc.Auth.AuthStore, (store) => store.isAuthenticated)
     handleIsAuthenticated(isAuthenticated: boolean) {
-        console.log("[Lobby] handleIsAuthenticated called with:", isAuthenticated);
+        console.log('[Lobby] Authentication state changed:', isAuthenticated);
         this.setState({ isAuthenticated });
         if (isAuthenticated) {
-            console.log("[Lobby] User authenticated, connecting to gateway");
+            console.log('[Lobby] User authenticated, connecting to gateway');
             this.connectLiveGateway();
         }
     }
 
     @handle(gc.GatewayConnection.GatewayConnectionHandlers.ConnectHandler)
     connectLiveGateway() {
+        console.log('[Lobby] Connecting to live gateway');
         // Register the connection when it's established
         const handler = this.getConnectionHandler();
 
         if (handler && (handler as any).connection) {
+            console.log('[Lobby] Registering gateway connection');
             this.connectionManager.registerGatewayConnection((handler as any).connection);
         }
     }
@@ -117,23 +124,27 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
      * Get connection handler from the container
      */
     private getConnectionHandler(): any {
+        console.log('[Lobby] Getting connection handler');
         try {
             const container = sharedContainer;
 
             if (!container) {
+                console.log('[Lobby] No container available');
                 return null;
             }
 
             const handler = container.get(gc.GatewayConnection.GatewayConnectionHandlers.ConnectHandler);
-
+            console.log('[Lobby] Connection handler retrieved:', !!handler);
             return handler;
         } catch (error) {
+            console.error('[Lobby] Error getting connection handler:', error);
             return null;
         }
     }
 
     @render(gc.Player.MainPlayerStore, (store) => store.offerGames)
     handleOfferGames(offerGames: IOfferGame[]) {
+        console.log('[Lobby] Handling offer games update:', offerGames?.length);
         if (offerGames?.length > 0) {
             const filteredOfferGames = lobbyUtils.getFilteredGames(offerGames);
             const expandedGames = filteredOfferGames.reduce(
@@ -146,6 +157,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
             this.setState({ offerGames: filteredOfferGames, expandedGames } as ILobbyState);
 
             if (!this.state.selectedGameId) {
+                console.log('[Lobby] Setting initial selected game:', filteredOfferGames[0].gameId);
                 this.setState({ selectedGameId: filteredOfferGames[0].gameId });
             }
         }
@@ -153,10 +165,13 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
 
     @render(LobbyStore, (store) => store.tryToConnectCount)
     updateTryToConnectCount(tryToConnectCount: number) {
+        console.log('[Lobby] Connection retry count updated:', tryToConnectCount);
         const isDisconnect = tryToConnectCount > 0;
         if (isDisconnect) {
+            console.log('[Lobby] Disconnected, triggering re-render');
             this.setState({ isRenderGame: false });
             this.reRenderGameTimeout = setTimeout(() => {
+                console.log('[Lobby] Re-enabling game render');
                 this.setState({ isRenderGame: true });
             }, 500);
         }
@@ -164,22 +179,27 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
 
     @render(gc.Auth.AuthStore, (store) => store.username)
     private handleUsername(username: string) {
+        console.log('[Lobby] Username updated:', username);
         username && this.setState({ username });
     }
 
     updateLeagueToogle = (leagueToogle: boolean) => {
+        console.log('[Lobby] League toggle updated:', leagueToogle);
         this.setState({ leagueToogle });
     };
 
     handleTabClick = (gameId: number) => {
+        console.log('[Lobby] Game tab selected:', gameId);
         this.setState({ selectedGameId: gameId });
     };
 
     private renderGames(context) {
+        console.log('[Lobby] Rendering games with context');
         const { offerGames, leagueToogle, selectedGameId, isSessionTimeout, isAuthenticated, username } = this.state;
 
         const renderGameContent = () => {
             if (isSessionTimeout) {
+                console.log('[Lobby] Rendering session timeout view');
                 return (
                     <SessionTimeout
                         token={this.props.token}
@@ -192,10 +212,12 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
 
             const hasGames = offerGames.length > 0;
             if (!hasGames || !isAuthenticated) {
+                console.log('[Lobby] Showing loading state');
                 return <Loading />;
             }
 
             const selectedGame = offerGames.find((game) => game.gameId === selectedGameId) || offerGames[0];
+            console.log('[Lobby] Rendering game content for:', selectedGame.gameId);
 
             return (
                 <>
@@ -204,7 +226,6 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
                         selectedGameId={selectedGameId}
                         onTabClick={this.handleTabClick}
                     />
-                    {/* Use the same pattern as preview.tsx - single component with key-based rendering */}
                     <div key={selectedGameId} style={{ height: '100%' }}>
                         <GameMatchTab
                             gameId={selectedGame.gameId}
@@ -230,6 +251,7 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
     }
 
     render() {
+        console.log('[Lobby] Rendering main component');
         return (
             <div className={styles['lobby']}>
                 <AppContextConsumer>{(context) => this.renderGames(context)}</AppContextConsumer>
