@@ -206,9 +206,12 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
 
     @render(gc.Player.MainPlayerStore, (store) => store.offerGames)
     handleOfferGames(offerGames: IOfferGame[]) {
+        console.log('[Lobby] ===== OFFER GAMES UPDATE =====');
         console.log('[Lobby] Handling offer games update:', offerGames?.length);
+        console.log('[Lobby] Offer games data:', offerGames);
         if (offerGames?.length > 0) {
             const filteredOfferGames = lobbyUtils.getFilteredGames(offerGames);
+            console.log('[Lobby] Filtered offer games:', filteredOfferGames);
             const expandedGames = filteredOfferGames.reduce(
                 (acc, game) => {
                     acc[game.gameId] = true;
@@ -216,13 +219,17 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
                 },
                 {} as { [key: number]: boolean },
             );
+            console.log('[Lobby] Setting state with filtered games and expanded games');
             this.setState({ offerGames: filteredOfferGames, expandedGames } as ILobbyState);
 
             if (!this.state.selectedGameId) {
                 console.log('[Lobby] Setting initial selected game:', filteredOfferGames[0].gameId);
                 this.setState({ selectedGameId: filteredOfferGames[0].gameId });
             }
+        } else {
+            console.log('[Lobby] No offer games available or empty array');
         }
+        console.log('[Lobby] ===== OFFER GAMES UPDATE END =====');
     }
 
     @render(LobbyStore, (store) => store.tryToConnectCount)
@@ -260,6 +267,14 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
         const { offerGames, leagueToogle, selectedGameId, isSessionTimeout, isAuthenticated, username } = this.state;
 
         const renderGameContent = () => {
+            console.log('[Lobby] ===== RENDER GAME CONTENT =====');
+            console.log('[Lobby] Current state for rendering:', {
+                isSessionTimeout,
+                offerGamesLength: offerGames.length,
+                isAuthenticated,
+                username
+            });
+
             if (isSessionTimeout) {
                 console.log('[Lobby] Rendering session timeout view');
                 return (
@@ -273,8 +288,10 @@ class LobbyComponent extends React.PureComponent<any, ILobbyState> {
             }
 
             const hasGames = offerGames.length > 0;
+            console.log('[Lobby] Has games check:', { hasGames, offerGamesLength: offerGames.length, isAuthenticated });
             if (!hasGames || !isAuthenticated) {
-                console.log('[Lobby] Showing loading state');
+                console.log('[Lobby] Showing loading state - condition not met');
+                console.log('[Lobby] hasGames:', hasGames, 'isAuthenticated:', isAuthenticated);
                 return <Loading />;
             }
 
