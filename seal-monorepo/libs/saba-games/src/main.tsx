@@ -17,7 +17,7 @@ const ErrorFallback = ({ error }) => {
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
-const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'UAT';
+const isDevelopment = process.env.NODE_ENV === 'development';
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('isDevelopment:', isDevelopment);
 const App = isDevelopment ? Preview : SabaGamesGroup;
