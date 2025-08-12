@@ -6,6 +6,16 @@ import './style.module.scss';
 import App from './app';
 import { PLATFORM_TYPE_MAPPING, PLATFORM_TYPE_NUMBER } from '../constant/app';
 
+type SabaGamesGroupProps = {
+    isDarkMode?: boolean;
+    platformType?: number;
+    token?: string;
+    appEnv?: string;
+    siteId?: string;
+    language?: string;
+    encryptionKey?: string;
+};
+
 export const useSentryInit = ({ siteId, appEnv }) => {
     useEffect(() => {
         try {
@@ -25,7 +35,7 @@ const SabaGamesGroup = ({
     siteId = '',
     language = 'en',
     encryptionKey = appSettings.encryptionKey || 'development-key'
-}) => {
+}: SabaGamesGroupProps) => {
     const platform = PLATFORM_TYPE_MAPPING[platformType] || '';
     useSentryInit({ siteId, appEnv });
 

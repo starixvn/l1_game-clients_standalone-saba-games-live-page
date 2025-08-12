@@ -2,7 +2,6 @@ import * as ReactDOM from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import SabaGamesGroup from './index';
-import Preview from './preview';
 
 const ErrorFallback = ({ error }) => {
     console.error('Error in application:', error);
@@ -16,15 +15,20 @@ const ErrorFallback = ({ error }) => {
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
-const isDevelopment = process.env.NODE_ENV === 'development';
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('isDevelopment:', isDevelopment);
-const App = isDevelopment ? Preview : SabaGamesGroup;
+const defaultProps = {
+    isDarkMode: false,
+    platformType: undefined,
+    token: '',
+    appEnv: '',
+    siteId: '',
+    language: 'en',
+    encryptionKey: undefined
+};
 
-// const App = Preview;
+const App = SabaGamesGroup;
 
-// Pass empty props in both development and production modes
-const props = {};
+// Explicit default props passed to the app
+const props = defaultProps;
 
 root.render(
     <ErrorBoundary FallbackComponent={ErrorFallback}>
