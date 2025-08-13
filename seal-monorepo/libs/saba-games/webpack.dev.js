@@ -25,21 +25,16 @@ module.exports = {
             tsConfig: './tsconfig.app.json',
             compiler: 'babel',
             main: './src/main.tsx',
-            index: './preview-template/index.html',
+            index: './src/index.html',
             baseHref: '/saba-games/',
             assets: [
-                {
-                    glob: '**/*',
-                    input: 'libs/saba-games/preview-template',
-                    output: '/',
-                },
                 {
                     glob: '**/*',
                     input: 'libs/saba-games/src/assets',
                     output: '/assets',
                 },
             ],
-            styles: ['./preview-template/styles.scss'],
+            styles: [],
             outputHashing: process.env['NODE_ENV'] === 'production' ? 'all' : 'none',
             optimization: process.env['NODE_ENV'] === 'production',
             sourceMap: false,

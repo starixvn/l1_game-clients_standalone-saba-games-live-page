@@ -3,18 +3,6 @@ const { NxReactWebpackPlugin } = require('@nx/react');
 const { join } = require('path');
 const webpack = require('webpack');
 
-const getPreviewAssets = (isDev) => {
-    if (!isDev) return [];
-
-    return [
-        {
-            glob: '**/*',
-            input: 'libs/saba-games/preview-template',
-            output: '/',
-        },
-    ];
-};
-
 module.exports = {
     output: {
         path: join(__dirname, '../../dist/libs/saba-games'),
@@ -31,17 +19,15 @@ module.exports = {
             tsConfig: './tsconfig.app.json',
             compiler: 'babel',
             main: './src/main.tsx',
-            index: process.env.NODE_ENV === 'development' ? './preview-template/index.html' : './src/index.html',
+            index: './src/index.html',
             assets: [
-                ...getPreviewAssets(process.env.NODE_ENV === 'development'),
                 {
                     glob: '**/*',
                     input: 'libs/saba-games/src/assets',
                     output: '/assets',
                 },
             ],
-
-            styles: process.env.NODE_ENV === 'development' ? ['./preview-template/styles.scss'] : [],
+            styles: [],
             outputHashing: 'all',
             optimization: process.env.NODE_ENV === 'production',
             sourceMap: false,
