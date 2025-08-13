@@ -47,9 +47,9 @@ const App = ({ appEnv, token, siteId, encryptionKey }: AppProps) => {
     }
 
     console.log("stand alone game decryptedToken: ", decryptedToken);
-    
+    const env = process.env.NODE_ENV || 'development';
     return (
-        <MessageProvider config={createMessageHandlerConfig(appEnv, encryptionKey)} options={{}}>
+        <MessageProvider config={createMessageHandlerConfig(env, encryptionKey)} options={{}}>
             <AppProvider appEnv={appEnv} siteId={siteId}>
                 <AppContent token={decryptedToken} />
             </AppProvider>

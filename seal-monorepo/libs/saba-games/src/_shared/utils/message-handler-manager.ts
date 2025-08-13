@@ -141,7 +141,8 @@ export class MessageHandlerManager {
 }
 
 export const createMessageHandlerConfig = (environment: string, encryptionKey?: string): MessageHandlerConfig => {
-    const isLocalDevelopment = environment === 'LOCAL' || environment === '';
+    console.log('createMessageHandlerConfig', environment);
+    const isLocalDevelopment = environment === 'development' || environment === '';
     const currentOrigin = window.location.origin;
 
     let allowedOrigins: string[];
