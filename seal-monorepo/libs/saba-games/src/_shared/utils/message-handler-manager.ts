@@ -142,19 +142,8 @@ export class MessageHandlerManager {
 
 export const createMessageHandlerConfig = (environment: string, encryptionKey?: string): MessageHandlerConfig => {
     const isLocalDevelopment = environment === 'LOCAL' || environment === '';
-    const currentOrigin = window.location.origin;
 
-    let allowedOrigins: string[];
-    if (isLocalDevelopment) {
-        allowedOrigins = [
-            'localhost:4200',
-            appSettings.iframeParentUrl,
-            currentOrigin
-        ];
-    } else {
-        // TODO: UAT, SIT, PROD
-        allowedOrigins = ['*'];
-    }
+    let allowedOrigins: string[] = ['*'];
 
     console.log('allow createMessageHandlerConfig', {
         isLocalDevelopment,
